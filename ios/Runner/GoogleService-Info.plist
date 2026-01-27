@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCLHIUvYXwYK9HU__58LbwWmSBn3INQhH8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>189317883598</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tnp.turfandpark</string>
+	<key>PROJECT_ID</key>
+	<string>turfnpark-1b95d</string>
+	<key>STORAGE_BUCKET</key>
+	<string>turfnpark-1b95d.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:189317883598:ios:23646d700a59fa1a90529f</string>
+</dict>
+</plist>

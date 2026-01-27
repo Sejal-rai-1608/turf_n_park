@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "290497643893",
+    "project_id": "turfnpark",
+    "storage_bucket": "turfnpark.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290497643893:android:8e2a2111889ba2303bff3c",
+        "android_client_info": {
+          "package_name": "com.tnp.turfandpark"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "290497643893-sr29fueh6ep918ptifqs3r0d4irk2ebm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tnp.turfandpark",
+            "certificate_hash": "f2cad438c4dbba58363852b364cccaa6d25aab17"
+          }
+        },
+        {
+          "client_id": "290497643893-haq8c3hl5ad4k1fvn2ahiugjq02mth07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGXwdCk2uKo-IgMWZmu5gVEv1OgZs9wgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "290497643893-eu7hvc4f6unii4e9v3dqfjo4g23sbtck.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
