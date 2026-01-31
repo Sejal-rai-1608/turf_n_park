@@ -1,13 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
-
 import '../helpers/widgets.dart';
 import 'helper_functions.dart';
 
-// import 'pre_login_owner.dart';
 class SelectLocation extends StatefulWidget {
   const SelectLocation({Key? key}) : super(key: key);
 
@@ -17,18 +15,14 @@ class SelectLocation extends StatefulWidget {
 
 class _SelectLocationState extends State<SelectLocation> {
   bool isLoading = false;
-
   var countries = [];
   var states = [];
   var cities = [];
-
   var dropdownSelectedCountry = "";
   var dropdownSelectedState = "";
   var dropdownSelectedCity = "";
   var SelectedLocation = "";
-
-  Location location = new Location();
-
+  Location location = Location();
   late bool _serviceEnabled;
   late PermissionStatus _permissionGranted;
   late LocationData _locationData;
@@ -38,16 +32,6 @@ class _SelectLocationState extends State<SelectLocation> {
   void initState() {
     super.initState();
     getCountries(context);
-    // countries.add({"id": "1", "country_name": "India"});
-    // countries.add({"id": "2", "country_name": "USA"});
-
-    // states.add({"id": "1", "name": "Maharashtra"});
-    // states.add({"id": "2", "name": "Rajasthan"});
-
-    // cities.add({"id": "1", "city_name": "Pune"});
-    // cities.add({"id": "2", "city_name": "Nashik"});
-    // cities.add({"id": "3", "city_name": "Mumbai"});
-    // cities.add({"id": "4", "city_name": "Jodhpur"});
   }
 
   getCountries(context) async {
@@ -149,256 +133,437 @@ class _SelectLocationState extends State<SelectLocation> {
     });
     Constants.lat = _locationData.latitude.toString();
     Constants.long = _locationData.longitude.toString();
-    Constants.fullLocation = "Nearst to Me";
+    Constants.fullLocation = "Nearest to Me";
     Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 245, 245, 245),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.green.shade500,
+        backgroundColor: Colors.green.shade600,
         elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "Select Location",
-          style: TextStyle(color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20.r),
+          ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Container(
+            padding: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 18.sp,
+            ),
+          ),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
+        title: Text(
+          "Select Location",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // SizedBox(height: 10,),
-
-            // Row(
-            //     mainAxisAlignment: MainAxisAlignment.center,
-            //     // alignment: Alignment.topRight,
-            //     children: [
-            //       Padding(
-            //         padding: EdgeInsets.symmetric(horizontal: 20),
-            //         child: Text(
-            //           "Select Location",
-            //           style: TextStyle(
-            //               fontSize: 16, fontWeight: FontWeight.bold),
-            //         ),
-            //       ),
-            //       Spacer(),
-            //       isLoading
-            //           ? Container(
-            //               padding: EdgeInsets.only(left: 10, top: 10),
-            //               child: CircularProgressIndicator(
-            //                 color: Colors.green.shade500,
-            //               ))
-            //           : SizedBox(width: 10),
-            //       Spacer(),
-            //       IconButton(
-            //         icon: Icon(Icons.close),
-            //         onPressed: () {
-            //           Navigator.of(context).pop();
-            //         },
-            //       )
-            //     ]),
-            // SizedBox(
-            //   height: 10,
-            // ),
-            GestureDetector(
-                onTap: () {
-                  getcurrentLocation();
-                },
-                child: Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(25),
+        physics: BouncingScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.all(10.r),
+          child: Column(
+            children: [
+              // Current Location Button
+              Container(
+                margin: EdgeInsets.only(bottom: 30.h),
+                child: Material(
+                  borderRadius: BorderRadius.circular(15.r),
+                  elevation: 4,
+                  child: Container(
                     decoration: BoxDecoration(
-                        border: Border.all(color: Colors.green.shade400),
-                        color: Colors.green.shade400,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (!loadingLocation)
-                          Icon(
-                            Icons.location_on_outlined,
-                            color: Colors.white,
-                            size: 25,
-                          ),
-                        if (!loadingLocation)
-                          SizedBox(
-                            width: 10,
-                          ),
-                        if (!loadingLocation)
-                          Text(
-                            "Nearest to my current location",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        if (loadingLocation)
-                          CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.green.shade500,
+                          Colors.green.shade600,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.shade200,
+                          blurRadius: 15.r,
+                          offset: Offset(0, 5.h),
+                        ),
                       ],
-                    ))),
-            Container(
-              alignment: Alignment.center,
-              child: Text("OR"),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Form(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Country",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.green.shade600)),
-                    DropdownButtonFormField<dynamic>(
-                        // value: dropdownSelectedUserType,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        iconSize: 24,
-                        hint: Text(
-                          "Select Country",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        isExpanded: true,
-                        style: const TextStyle(color: Colors.black),
-                        //underline: SizedBox(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            dropdownSelectedCountry = newValue!;
-
-                            getStates(context);
-                          });
-                        },
-                        items: countries.map<DropdownMenuItem<dynamic>>((item) {
-                          return DropdownMenuItem(
-                            value: item['id'],
-                            child: Text(item['country_name']),
-                          );
-                        }).toList()),
-                    SizedBox(height: 25),
-                    Text("State",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.green.shade600)),
-                    DropdownButtonFormField<dynamic>(
-                        // value: dropdownSelectedState,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        iconSize: 24,
-                        hint: Text(
-                          "Select State",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        isExpanded: true,
-                        style: const TextStyle(color: Colors.black),
-                        //underline: SizedBox(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            dropdownSelectedState = newValue!;
-
-                            getCities(context);
-                          });
-                        },
-                        items: states.map<DropdownMenuItem<dynamic>>((item) {
-                          return DropdownMenuItem(
-                            value: item['id'],
-                            child: Text(item['name']),
-                          );
-                        }).toList()),
-                    SizedBox(height: 25),
-                    Text("City",
-                        style: TextStyle(
-                            fontSize: 14, color: Colors.green.shade600)),
-                    DropdownButtonFormField<dynamic>(
-                        // value: dropdownSelectedCity,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        iconSize: 24,
-                        hint: Text(
-                          "Select City",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        isExpanded: true,
-                        style: const TextStyle(color: Colors.black),
-                        //underline: SizedBox(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            dropdownSelectedCity = newValue!;
-                          });
-                        },
-                        items: cities.map<DropdownMenuItem<dynamic>>((item) {
-                          return DropdownMenuItem(
-                            value: item['id'],
-                            child: Text(item['city_name']),
-                          );
-                        }).toList()),
-                    SizedBox(
-                      height: 40,
                     ),
-                    Container(
-                        alignment: Alignment.center,
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(15.r),
+                      child: InkWell(
+                        onTap: () {
+                          getcurrentLocation();
+                        },
+                        borderRadius: BorderRadius.circular(15.r),
                         child: Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            // width: MediaQuery.of(context).size.width*0.6,
-                            child: RaisedGradientButton(
-                              child: Text(
-                                'Submit',
-                                style: TextStyle(
+                          padding: EdgeInsets.all(20.r),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (!loadingLocation)
+                                Icon(
+                                  Icons.location_on,
+                                  color: Colors.white,
+                                  size: 26.sp,
+                                ),
+                              if (!loadingLocation) SizedBox(width: 12.w),
+                              if (!loadingLocation)
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Use Current Location",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4.h),
+                                      Text(
+                                        "Find turfs and parking near you",
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontSize: 14.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (loadingLocation)
+                                Container(
+                                  width: 24.w,
+                                  height: 24.h,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5.w,
                                     color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              gradient: LinearGradient(
-                                colors: <Color>[
-                                  Colors.green.shade500,
-                                  Colors.green.shade600
-                                ],
-                              ),
-                              onPressed: () {
-                                if (dropdownSelectedCountry.length > 0 &&
-                                    dropdownSelectedState.length > 0 &&
-                                    dropdownSelectedCity.length > 0) {
-                                  Constants.country_id =
-                                      dropdownSelectedCountry.toString();
-                                  Constants.state_id =
-                                      dropdownSelectedState.toString();
-                                  Constants.city_id =
-                                      dropdownSelectedCity.toString();
-                                  // states.forEach((element) {
-                                  //   if(element['id'] == dropdownSelectedState){
-                                  //     SelectedLocation = SelectedLocation+element['name']+"/";
-                                  //   }
-                                  // });
-                                  cities.forEach((element) {
-                                    if (element['id'] == dropdownSelectedCity) {
-                                      SelectedLocation = SelectedLocation +
-                                          element['city_name'];
-                                    }
-                                  });
-                                  Constants.fullLocation =
-                                      SelectedLocation.toString();
-                                  Navigator.of(context).pop(true);
-                                } else {
-                                  showSnackbar(context,
-                                      "Please Select all fields correctly.");
-                                }
-                                // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SelectType()));
-                              },
-                              key: Key("test"),
-                            )))
-                  ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            )
+
+              // OR Divider
+              Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey.shade300,
+                      thickness: 1.w,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    child: Text(
+                      "OR",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey.shade300,
+                      thickness: 1.w,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 10.h),
+
+              // Manual Location Selection
+              Text(
+                "Select Location Manually",
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+              //SizedBox(height: 5.h),
+              Text(
+                "Choose your country, state and city",
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14.sp,
+                ),
+              ),
+              SizedBox(height: 10.h),
+
+              // Country Dropdown
+              _buildDropdownSection(
+                title: "Country",
+                hint: "Select Country",
+                items: countries,
+                valueKey: 'id',
+                labelKey: 'country_name',
+                onChanged: (newValue) {
+                  setState(() {
+                    dropdownSelectedCountry = newValue!;
+                    getStates(context);
+                    dropdownSelectedState = "";
+                    dropdownSelectedCity = "";
+                    cities = [];
+                  });
+                },
+                selectedValue: dropdownSelectedCountry,
+              ),
+
+              SizedBox(height: 10.h),
+
+              // State Dropdown
+              _buildDropdownSection(
+                title: "State",
+                hint: "Select State",
+                items: states,
+                valueKey: 'id',
+                labelKey: 'name',
+                onChanged: (newValue) {
+                  setState(() {
+                    dropdownSelectedState = newValue!;
+                    getCities(context);
+                    dropdownSelectedCity = "";
+                  });
+                },
+                selectedValue: dropdownSelectedState,
+                enabled: dropdownSelectedCountry.isNotEmpty,
+              ),
+
+              SizedBox(height: 10.h),
+
+              // City Dropdown
+              _buildDropdownSection(
+                title: "City",
+                hint: "Select City",
+                items: cities,
+                valueKey: 'id',
+                labelKey: 'city_name',
+                onChanged: (newValue) {
+                  setState(() {
+                    dropdownSelectedCity = newValue!;
+                  });
+                },
+                selectedValue: dropdownSelectedCity,
+                enabled: dropdownSelectedState.isNotEmpty,
+              ),
+
+              SizedBox(height: 20.h),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (dropdownSelectedCountry.isNotEmpty &&
+                        dropdownSelectedState.isNotEmpty &&
+                        dropdownSelectedCity.isNotEmpty) {
+                      Constants.country_id = dropdownSelectedCountry;
+                      Constants.state_id = dropdownSelectedState;
+                      Constants.city_id = dropdownSelectedCity;
+
+                      // Find selected city name
+                      String cityName = "";
+                      for (var element in cities) {
+                        if (element['id'] == dropdownSelectedCity) {
+                          cityName = element['city_name'];
+                          break;
+                        }
+                      }
+
+                      Constants.fullLocation = cityName;
+                      Navigator.of(context).pop(true);
+                    } else {
+                      showSnackbar(
+                          context, "Please select all fields correctly.");
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade600,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.r),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 40.w,
+                      vertical: 18.h,
+                    ),
+                    elevation: 5,
+                    shadowColor: Colors.green.shade300,
+                  ),
+                  child: Text(
+                    'Apply Location',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownSection({
+    required String title,
+    required String hint,
+    required List items,
+    required String valueKey,
+    required String labelKey,
+    required Function(dynamic) onChanged,
+    required String selectedValue,
+    bool enabled = true,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15.r),
+        border: Border.all(
+          color: enabled ? Colors.grey.shade200 : Colors.grey.shade100,
+          width: 1.5.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: Offset(0, 3.h),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(15.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 8.w,
+                  height: 8.w,
+                  decoration: BoxDecoration(
+                    color:
+                        enabled ? Colors.green.shade500 : Colors.grey.shade400,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        enabled ? Colors.grey.shade800 : Colors.grey.shade400,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                color: enabled ? Colors.white : Colors.grey.shade50,
+              ),
+              child: DropdownButtonFormField<dynamic>(
+                value: selectedValue.isNotEmpty ? selectedValue : null,
+                icon: Icon(
+                  Icons.arrow_drop_down_rounded,
+                  color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                  size: 26.sp,
+                ),
+                iconSize: 24,
+                hint: Text(
+                  hint,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color:
+                        enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                  ),
+                ),
+                isExpanded: true,
+                style: TextStyle(
+                  color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 16.h,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade200,
+                      width: 1.5.w,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade200,
+                      width: 1.5.w,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(
+                      color: Colors.green.shade400,
+                      width: 2.w,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: enabled ? Colors.white : Colors.grey.shade50,
+                ),
+                onChanged: enabled ? onChanged : null,
+                items: items.map<DropdownMenuItem<dynamic>>((item) {
+                  return DropdownMenuItem(
+                    value: item[valueKey],
+                    child: Text(
+                      item[labelKey],
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontSize: 15.sp,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ],
         ),
       ),

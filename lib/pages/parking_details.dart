@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:carousel_slider/carousel_slider.dart';
-
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:paytm/paytm.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:zoom_pinch_overlay/zoom_pinch_overlay.dart';
@@ -17,6 +15,7 @@ import 'parkingList.dart';
 class ParkingDetails extends StatefulWidget {
   ParkingDetails(this.parkingDetails);
   var parkingDetails;
+
   @override
   State<ParkingDetails> createState() =>
       _ParkingDetailsState(this.parkingDetails);
@@ -31,7 +30,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
   bool isLoadingPayment = false;
   Map parkingData = {};
   TextEditingController startDateController = TextEditingController();
-  // var slotList = [];
   List slotList = [
     {"id": "1", "name": "1 Months"},
     {"id": "2", "name": "2 Months"},
@@ -39,6 +37,7 @@ class _ParkingDetailsState extends State<ParkingDetails> {
     {"id": "4", "name": "4 Months"},
   ];
   var dropdownSelectedSlot = "1";
+  int _currentCarouselIndex = 0;
 
   var mid;
   var orderId;
@@ -80,11 +79,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
       setState(() {
         parkingData = list;
       });
-      //  if(parkingData["dates"].length > 0){
-      //    if(parkingData["dates"][0] !=null && parkingData["dates"][0]["full_date"] !=null){
-      //      getTurfSlots(context, parkingData["dates"][0]["full_date"]);
-      //    }
-      //  }
     } else {
       showSnackbar(context, body['message']);
       parkingData = {};
@@ -105,11 +99,19 @@ class _ParkingDetailsState extends State<ParkingDetails> {
       initialDate: DateTime(year, month, day),
       firstDate: DateTime(year, month, day),
       lastDate: DateTime(2300),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.green.shade600,
+            colorScheme: ColorScheme.light(primary: Colors.green.shade600),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
-      //
       startDateController.text = convertDateTimeToString(picked).toString();
-      // setS
     }
   }
 
@@ -120,461 +122,759 @@ class _ParkingDetailsState extends State<ParkingDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.green.shade500,
+        backgroundColor: Colors.green.shade600,
         elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(25),
+          ),
+        ),
+        leading: Container(
+          margin: EdgeInsets.only(left: 10),
+          child: CircleAvatar(
+            backgroundColor: Colors.white.withOpacity(0.2),
+            child: IconButton(
+              icon:
+                  Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ),
         title: Text(
           "Parking Details",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          child: Stack(children: [
-            Container(
-              color: Color(0xffF2F2F2),
-              // margin:EdgeInsets.symmetric(horizontal:10,vertical:10 ),
-              // padding: EdgeInsets.symmetric(horizontal:10,vertical:10 ),
-              height: MediaQuery.of(context).size.height * 0.27,
-              width: double.infinity,
-              child: CarouselSlider(
-                  options: CarouselOptions(
-                    scrollPhysics: NeverScrollableScrollPhysics(),
-                    autoPlay: true,
-                  ),
-                  items: listImages.map((i) {
-                    return Builder(builder: (BuildContext context) {
-                      return InkWell(
-                        onTap: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ZoomOverlay(
-                                      twoTouchOnly: true,
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: FancyShimmerImage(
-                                          //  height: 40.h,
-                                          imageUrl: i,
-                                          errorWidget: Icon(Icons.person),
-                                          boxFit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "  Use Two Fingers to zoom the image.  ",
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text("Close"))
-                                  ],
-                                );
-                              });
-                        },
-                        child: ZoomOverlay(
-                          twoTouchOnly: true,
-                          child: Container(
-                            color: Colors.white,
-                            child: FancyShimmerImage(
-                              height: 200,
-                              imageUrl: i,
-                              errorWidget: Icon(Icons.person),
-                              boxFit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      );
-                    });
-                  }).toList()),
-
-              // width: MediaQuery.of(context).size.width*0.85,
-              // decoration: BoxDecoration(
-              //   image: DecorationImage(
-              //     image: NetworkImage(turfData['main_image']),
-              //     fit: BoxFit.cover,
-              //   ),
-              // ),
-            ),
-            // Positioned(
-            //     top: 10,
-            //     left: 10,
-            //     child: Container(
-            //         decoration: BoxDecoration(
-            //             color: Colors.white, shape: BoxShape.circle),
-            //         child: IconButton(
-            //           icon: Icon(Icons.arrow_back_rounded, size: 25),
-            //           onPressed: () {
-            //             Navigator.of(context).pop();
-            //           },
-            //         ))),
-            Positioned(
-              top: 180,
-              height: MediaQuery.of(context).size.height - 180,
-              child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                  // alignment: Alignment.bottomCenter,
-                  height: MediaQuery.of(context).size.width - 180,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20)),
-                    color: Color.fromARGB(255, 254, 255, 254),
-                  ),
-                  child: SingleChildScrollView(
-                    child: isLoadingPayment
-                        ? Container(
-                            child: Shimmer.fromColors(
-                              baseColor: Colors.grey.shade400,
-                              highlightColor: Colors.grey.shade600,
-                              enabled: true,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(15)),
-                                  color: Colors.white,
-                                ),
-                                // width: MediaQuery.of(context).size.width*0.90,
-                                height: 200,
-                                width: MediaQuery.of(context).size.width * 0.9,
-                              ),
-                            ),
-                          )
-                        : Column(
-                            // mainAxisAlignment:MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                                SizedBox(
-                                  height: 25,
-                                ),
-                                Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // crossAxisAlignment: ,
-                                    children: [
-                                      Text(parkingDetails['title'],
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black)),
-                                    ]),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // crossAxisAlignment: ,
-                                    children: [
-                                      Text(
-                                          "${parkingDetails['rent']}" +
-                                              " " +
-                                              parkingDetails['payment_type'],
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black)),
-                                    ]),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Divider(),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  parkingDetails['address'],
-                                  style: TextStyle(color: Colors.grey.shade700),
-                                ),
-                                SizedBox(
-                                  height: 25,
-                                ),
-                                Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    // crossAxisAlignment: ,
-                                    children: [
-                                      Container(
-                                          padding: EdgeInsets.all(5),
+      body: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            // Carousel Section
+            Expanded(
+              flex: 4,
+              child: Stack(
+                children: [
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: double.infinity,
+                      autoPlay: true,
+                      autoPlayInterval: Duration(seconds: 4),
+                      viewportFraction: 1.0,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _currentCarouselIndex = index;
+                        });
+                      },
+                    ),
+                    items: listImages.map((i) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: EdgeInsets.all(20),
+                                    child: Stack(
+                                      children: [
+                                        Container(
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(15)),
-                                            border: Border.all(
-                                                color: Colors.grey.shade700,
-                                                width: 1.0),
-                                            // color: Colors.white
-                                          ),
-                                          alignment: Alignment.center,
-                                          width: 100,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            // crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Icon(Icons.star,
-                                                  size: 17,
-                                                  color: Colors.yellow),
-                                              Icon(Icons.star,
-                                                  size: 17,
-                                                  color: Colors.yellow),
-                                              Icon(Icons.star,
-                                                  size: 17,
-                                                  color: Colors.yellow),
-                                              Icon(Icons.star,
-                                                  size: 17,
-                                                  color: Colors.yellow),
-                                              Icon(Icons.star_border,
-                                                  size: 17,
-                                                  color: Colors.grey.shade700),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.4),
+                                                blurRadius: 40,
+                                              ),
                                             ],
-                                          )),
-                                      Container(
-                                          padding: EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(15)),
-                                              // border: Border.all(color:Colors.grey.shade700,width: 1.0),
-                                              color: Colors.blue.shade800),
-                                          alignment: Alignment.center,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              150,
-                                          child: Text(
-                                            "Available After " +
-                                                parkingDetails['start_date'],
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold),
-                                          )),
-                                    ]),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Text(
-                                  "Owner",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Row(children: [
-                                  isLoading
-                                      ? Container(
-                                          child: Shimmer.fromColors(
-                                            baseColor: Colors.grey.shade400,
-                                            highlightColor:
-                                                Colors.grey.shade600,
-                                            enabled: true,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(8)),
-                                                color: Colors.white,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            child: ZoomOverlay(
+                                              twoTouchOnly: true,
+                                              child: Container(
+                                                color: Colors.black,
+                                                child: FancyShimmerImage(
+                                                  imageUrl: i,
+                                                  errorWidget: Icon(Icons.image,
+                                                      size: 50,
+                                                      color: Colors.white),
+                                                  boxFit: BoxFit.fill,
+                                                ),
                                               ),
-                                              // width: MediaQuery.of(context).size.width*0.90,
-                                              height: 50,
-                                              width: 50,
                                             ),
                                           ),
-                                        )
-                                      : Container(
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(8)),
-                                              // border: Border.all(color:Colors.grey.shade700,width: 1.0),
-                                              color: Colors.grey,
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                    "assets/user-image.png"),
-                                                fit: BoxFit.cover,
-                                              )),
-                                          alignment: Alignment.center,
-                                          width: 50,
-                                          height: 50,
                                         ),
-                                  isLoading
-                                      ? Container(
-                                          padding: EdgeInsets.all(5),
-                                          child: Shimmer.fromColors(
-                                            baseColor: Colors.grey.shade200,
-                                            highlightColor:
-                                                Colors.grey.shade400,
-                                            enabled: true,
+                                        Positioned(
+                                          top: 10,
+                                          right: 10,
+                                          child: GestureDetector(
+                                            onTap: () => Navigator.pop(context),
                                             child: Container(
+                                              padding: EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(2)),
-                                                color: Colors.white,
+                                                color: Colors.black
+                                                    .withOpacity(0.5),
+                                                shape: BoxShape.circle,
                                               ),
-                                              // width: MediaQuery.of(context).size.width*0.90,
-                                              height: 20,
-                                              width: 200,
+                                              child: Icon(Icons.close,
+                                                  color: Colors.white),
                                             ),
                                           ),
-                                        )
-                                      : Container(
-                                          padding: EdgeInsets.only(left: 20),
-                                          alignment: Alignment.centerLeft,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              100,
-                                          height: 50,
-                                          child: Text(
-                                              "" +
-                                                  parkingData['owner_name']
-                                                      .toString(),
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold)))
-                                ]),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Divider(),
-                                SizedBox(height: 10),
-                                Text(
-                                  "Select Booking Period",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                SizedBox(height: 5),
-                                DropdownButtonFormField<dynamic>(
-                                    // value: dropdownSelectedSlot,
-                                    // value: dropdownSelectedUserType,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
+                                        ),
+                                        Positioned(
+                                          bottom: 20,
+                                          left: 0,
+                                          right: 0,
+                                          child: Center(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black
+                                                    .withOpacity(0.6),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                "Use two fingers to zoom",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    icon: const Icon(Icons.arrow_drop_down),
-                                    iconSize: 24,
-                                    hint: Text(
-                                      "Select Period",
-                                      style: TextStyle(
-                                          fontSize: 16, color: Colors.black),
-                                    ),
-                                    isExpanded: true,
-                                    style: const TextStyle(color: Colors.black),
-                                    //underline: SizedBox(),
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        dropdownSelectedSlot = newValue!;
-                                      });
-                                    },
-                                    items: slotList
-                                        .map<DropdownMenuItem<dynamic>>((item) {
-                                      return DropdownMenuItem(
-                                        value: item['id'],
-                                        child: Text(item['name']),
-                                      );
-                                    }).toList()),
-                                SizedBox(height: 25),
-                                TextFormField(
-                                  controller: startDateController,
-                                  readOnly: true,
-                                  onTap: () {
-                                    pickDate(context, startDateController, '');
-                                  },
-                                  validator: (value) => value!.isEmpty
-                                      ? 'Date cannot be blank'
-                                      : null,
-                                  decoration: new InputDecoration(
-                                    labelText: "Start Date",
+                                  );
+                                },
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              child: FancyShimmerImage(
+                                imageUrl: i,
+                                errorWidget: Container(
+                                  color: Colors.grey.shade200,
+                                  child: Icon(
+                                    Icons.local_parking_rounded,
+                                    size: 60,
+                                    color: Colors.grey.shade400,
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    if (dropdownSelectedSlot.isNotEmpty &&
-                                        startDateController.text.isNotEmpty) {
-                                      parkingDetails['start_from'] =
-                                          startDateController.text;
-                                      parkingDetails['qty'] =
-                                          dropdownSelectedSlot;
-                                      calculateAndPay();
-                                    } else {
-                                      showSnackbar(context,
-                                          "Please select booking period and start date propoerly.");
-                                    }
-                                  },
-                                  child: isLoadingPayment
-                                      ? Center(
-                                          child: CircularProgressIndicator(),
-                                        )
-                                      : Container(
-                                          alignment: Alignment.center,
-                                          child: Container(
-                                              padding: EdgeInsets.all(5),
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(25)),
-                                                  // border: Border.all(color:Colors.grey.shade700,width: 1.0),
-                                                  color: Colors.green.shade400),
-                                              alignment: Alignment.center,
-                                              width: 200,
-                                              height: 50,
-                                              child: Text(
-                                                "Pay and book",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18),
-                                              )),
-                                        ),
-                                ),
-                                SizedBox(
-                                  height: 30,
-                                ),
-                              ]),
-                  )),
+                                boxFit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  Positioned(
+                    bottom: 15,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: listImages.asMap().entries.map((entry) {
+                        return Container(
+                          width: 8,
+                          height: 8,
+                          margin: EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentCarouselIndex == entry.key
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.5),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            //   Positioned(
-            //     top:180,
-            //     child:Container(
-            //       padding: EdgeInsets.all(15),
-            //       width:MediaQuery.of(context).size.width,
-            //       height: 30,
-            //         decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.only(topLeft:Radius.circular(20),topRight:Radius.circular(20)),
-            //             color: Colors.white
-            //           ),
-            //     )
-            //   ),
-          ]),
+
+            // Content Section
+            Expanded(
+              flex: 6,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title and Price
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    parkingDetails['title'] ?? 'Parking Space',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade900,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_rounded,
+                                        size: 18,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          parkingDetails['address'] ?? '',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.green.shade500,
+                                    Colors.green.shade700,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.shade200,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "₹${parkingDetails['rent']?.split(".")[0] ?? '0'}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    parkingDetails['payment_type'] ??
+                                        'per month',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 10),
+
+                        // Rating and Availability Card
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade100,
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Rating
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.amber.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.star_rounded,
+                                        color: Colors.amber.shade700,
+                                        size: 18,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "4.0",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.amber.shade900,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Rating",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(width: 12),
+
+                              // Availability
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.blue.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today_rounded,
+                                        color: Colors.blue.shade700,
+                                        size: 18,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Available",
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                            Text(
+                                              parkingDetails['start_date'] ??
+                                                  '',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.blue.shade900,
+                                                fontSize: 13,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+
+                        // Owner Card
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade100,
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                "OWNER",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade600,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              Container(
+                                height: 24,
+                                width: 1,
+                                margin: EdgeInsets.symmetric(horizontal: 12),
+                                color: Colors.grey.shade300,
+                              ),
+                              Expanded(
+                                child: isLoading
+                                    ? Shimmer.fromColors(
+                                        baseColor: Colors.grey.shade200,
+                                        highlightColor: Colors.grey.shade100,
+                                        child: Container(
+                                          height: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        parkingData['owner_name'] ??
+                                            'Loading...',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green.shade900,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20),
+
+                        // Booking Section
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.05),
+                                blurRadius: 20,
+                                offset: Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.calendar_month_rounded,
+                                      color: Colors.green.shade700,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    "Booking Details",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              SizedBox(height: 10),
+
+                              Text(
+                                "Select Booking Period",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              DropdownButtonFormField<dynamic>(
+                                value: dropdownSelectedSlot,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.green.shade400,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 16),
+                                ),
+                                icon: Icon(Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.grey.shade600),
+                                iconSize: 20,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    dropdownSelectedSlot = newValue!;
+                                  });
+                                },
+                                items: slotList
+                                    .map<DropdownMenuItem<dynamic>>((item) {
+                                  return DropdownMenuItem(
+                                    value: item['id'],
+                                    child: Text(
+                                      item['name'],
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade800,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+
+                              SizedBox(height: 10),
+
+                              Text(
+                                "Start Date",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  pickDate(context, startDateController, '');
+                                },
+                                child: AbsorbPointer(
+                                  child: TextFormField(
+                                    controller: startDateController,
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: Colors.grey.shade50,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.green.shade400,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 16),
+                                      hintText: "Select start date",
+                                      hintStyle: TextStyle(
+                                          color: Colors.grey.shade500),
+                                      suffixIcon: Icon(
+                                        Icons.calendar_today_rounded,
+                                        color: Colors.grey.shade600,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(height: 10),
+
+                              // Pay Button
+                              isLoadingPayment
+                                  ? Center(
+                                      child: Column(
+                                        children: [
+                                          CircularProgressIndicator(
+                                            color: Colors.green.shade600,
+                                          ),
+                                          SizedBox(height: 16),
+                                          Text(
+                                            "Processing Payment...",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: () {
+                                        if (dropdownSelectedSlot.isNotEmpty &&
+                                            startDateController
+                                                .text.isNotEmpty) {
+                                          parkingDetails['start_from'] =
+                                              startDateController.text;
+                                          parkingDetails['qty'] =
+                                              dropdownSelectedSlot;
+                                          calculateAndPay();
+                                        } else {
+                                          showSnackbar(context,
+                                              "Please select booking period and start date properly.");
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green.shade600,
+                                        minimumSize: Size(double.infinity, 55),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                        ),
+                                        elevation: 5,
+                                        shadowColor: Colors.green.shade200,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_rounded,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            "PAY & BOOK NOW",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                              SizedBox(height: 10),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 30),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-// Widget create
 
+  // All your existing methods remain exactly the same
   calculateAndPay() {
     setState(() {
       isLoadingPayment = true;
@@ -585,9 +885,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
   }
 
   initPaymentPaytm(amount) async {
-    // setState(() {
-    //   isLoading = true;
-    // });
     var url = Uri.parse(Constants.base_url + 'Service/create_paytm_token');
 
     var response = await http.post(url, body: {
@@ -602,30 +899,17 @@ class _ParkingDetailsState extends State<ParkingDetails> {
     });
     if (response.statusCode == 200) {
       var result = body['message'];
-
       mid = body['mid'];
       orderId = body['orderId'];
       amount = body['amount'];
       callBackUrl = body['callBackUrl'];
       testing = body['testing'];
       txnToken = result['body']['txnToken'];
-      // payNowPaytm();
-      //     var mid;
-      // var orderId;
-      // var amount;
-      // var callBackUrl;
-      // var testing;
-
-      // var order_id = body['message'];
-      // var key = body['key_id'];
-      // payNow(key, order_id);
     } else if (response.statusCode == 401) {
       showSnackbar(context, body['message']);
       onLogout(context);
     } else {
       showSnackbar(context, body['message']);
-      // cartData = [];
-      // cart_total = 0;
       setState(() {});
     }
   }
@@ -653,48 +937,9 @@ class _ParkingDetailsState extends State<ParkingDetails> {
       onLogout(context);
     } else {
       showSnackbar(context, body['message']);
-
       setState(() {});
     }
   }
-
-  // payNowPaytm() {
-  //   var paytmResponse = Paytm.payWithPaytm(
-  //       mId: mid,
-  //       orderId: orderId.toString(),
-  //       txnToken: txnToken,
-  //       txnAmount: amount.toString(),
-  //       callBackUrl: callBackUrl,
-  //       staging: testing,
-  //       appInvokeEnabled: false);
-
-  //   paytmResponse.then((value) {
-  //     setState(() {
-  //       // loading = false;
-
-  //       if (value['error']) {
-  //         payment_response = value['errorMessage'];
-  //       } else {
-  //         if (value['response'] != null) {
-  //           payment_response = value['response']['STATUS'];
-  //         }
-  //       }
-  //       if (payment_response == "TXN_SUCCESS" ||
-  //           payment_response == "PENDING") {
-  //         validatePaytmPaymentAndProcessCart(value);
-  //       } else {
-  //         showSnackbar(
-  //             context,
-  //             "Your Payment Status is " +
-  //                 payment_response +
-  //                 " . Please try again.");
-  //         Navigator.of(context).pop();
-  //       }
-  //       // payment_response += "\n" + value.toString();
-  //       //
-  //     });
-  //   });
-  // }
 
   payNow(key, orderId, amount) {
     _razorpay = Razorpay();
@@ -717,22 +962,16 @@ class _ParkingDetailsState extends State<ParkingDetails> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    // Do something when payment succeeds
-    //
     validatePaymentAndProcessCart(response);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    // Do something when payment fails
-
     showSnackbar(context, "Your payment is failed. Please try again");
     Navigator.of(context).pop();
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     // Do something when an external wallet was selected
-
-    // showSnackbar(context, "EXTERNAL_WALLET: " + response.walletName!);
   }
 
   validatePaymentAndProcessCart(res) async {
@@ -767,7 +1006,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
       onLogout(context);
     } else {
       showSnackbar(context, body['message']);
-
       setState(() {});
     }
   }
@@ -778,9 +1016,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
     });
     var payload = {
       "userToken": Constants.token,
-      // "payment_id": res.paymentId.toString(),
-      // "order_id": res.orderId.toString(),
-      // "signature": res.signature.toString(),
       "start_date": startDateController.text,
       "end_date": startDateController.text,
       "payment_type": parkingDetails['payment_type'],
@@ -811,7 +1046,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
       onLogout(context);
     } else {
       showSnackbar(context, body['message']);
-
       setState(() {});
     }
   }

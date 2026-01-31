@@ -377,8 +377,8 @@ class _MyBookingsOwnerState extends State<MyBookingsOwner> {
                                     Container(
                                       child: Shimmer.fromColors(
                                         baseColor: Colors.grey.shade400,
-                                        highlightColor: Colors.grey.shade600,
                                         enabled: true,
+                                        highlightColor: Colors.grey.shade600,
                                         child: Container(
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.all(

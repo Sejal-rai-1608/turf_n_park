@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // Add this import
 import 'package:get/get.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:turfandpark/firebase_options.dart';
@@ -64,10 +65,8 @@ class _MyAppState extends State<MyApp> {
 
   getLoggedInToken() async {
     await LoginData.getTokenSharedPreference().then((value) {
-      // showScreen();\
       if (mounted)
         setState(() {
-          // userIsLoggedIn  = false;
           if (value != null) {
             Constants.token = value;
             loadAllTempData();
@@ -95,10 +94,8 @@ class _MyAppState extends State<MyApp> {
 
   loadAllTempData() async {
     await LoginData.getUserEmailSharedPreference().then((value) {
-      // showScreen();
       if (mounted)
         setState(() {
-          // userIsLoggedIn  = false;
           if (value != null) {
             Constants.email = value;
           } else {
@@ -108,10 +105,8 @@ class _MyAppState extends State<MyApp> {
     });
 
     await LoginData.getUserMobileSharedPreference().then((value) {
-      // showScreen();
       if (mounted)
         setState(() {
-          // userIsLoggedIn  = false;
           if (value != null) {
             Constants.mobile = value;
           } else {
@@ -121,10 +116,8 @@ class _MyAppState extends State<MyApp> {
     });
 
     await LoginData.getUserNameSharedPreference().then((value) {
-      // showScreen();
       if (mounted)
         setState(() {
-          // userIsLoggedIn  = false;
           if (value != null) {
             Constants.name = value;
           } else {
@@ -133,12 +126,10 @@ class _MyAppState extends State<MyApp> {
         });
     });
     await LoginData.getUserTypeSharedPreference().then((value) {
-      // showScreen();
       Future.delayed(
         Duration(seconds: 1),
         () {
           setState(() {
-            // userIsLoggedIn  = false;
             if (value != null) {
               userType = value;
             } else {
@@ -150,7 +141,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     Map<int, Color> color = {
@@ -166,106 +156,78 @@ class _MyAppState extends State<MyApp> {
       900: Color.fromRGBO(0, 255, 0, 1),
     };
     MaterialColor colorCustom = MaterialColor(0xFF7BD19B, color);
-    return GetMaterialApp(
-      color: Colors.white,
-      debugShowCheckedModeBanner: false,
-      title: 'Turf and Park',
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          // case SplashScreen.id:
-          //   return PageTransition(
-          //     child: const SplashScreen(),
-          //     type: PageTransitionType.fade,
-          //     duration: const Duration(milliseconds: 300),
-          //     settings: settings,
-          //   );
 
-          // // case ProductDetailsScreen.id:
-          // //   return PageTransition(
-          // //     child: const ProductDetailsScreen(),
-          // //     type: PageTransitionType.scale,
-          // //     curve: Curves.ease,
-          // //     alignment: Alignment.center,
-          // //     duration: const Duration(milliseconds: 300),
-          // //     settings: settings,
-          // //   );
-          // case RegisterScreen.id:
-          //   return PageTransition(
-          //     child: RegisterScreen(
-          //       user: User(),
-          //     ),
-          //     type: PageTransitionType.scale,
-          //     curve: Curves.ease,
-          //     alignment: Alignment.center,
-          //     duration: const Duration(
-          //       milliseconds: 300,
-          //     ),
-          //     settings: settings,
-          //   );
-          case UserSignupStep1.id:
-            return PageTransition(
-              child: const UserSignupStep1(),
-              type: PageTransitionType.scale,
-              curve: Curves.ease,
-              alignment: Alignment.center,
-              duration: const Duration(milliseconds: 300),
-              settings: settings,
-            );
-          case TurfList.id:
-            return PageTransition(
-              child: const TurfList(),
-              type: PageTransitionType.scale,
-              curve: Curves.ease,
-              alignment: Alignment.center,
-              duration: const Duration(milliseconds: 300),
-              settings: settings,
-            );
-          case LoginUser.id:
-            return PageTransition(
-              child: const LoginUser(),
-              type: PageTransitionType.scale,
-              curve: Curves.bounceIn,
-              alignment: Alignment.center,
-              duration: const Duration(milliseconds: 400),
-              settings: settings,
-            );
-
-          default:
-            return null;
-        }
-      },
-      theme: ThemeData(
-          useMaterial3: true,
-          primarySwatch:
-              colorCustom //MaterialColor(0xFF65EB00,this.color)//Colors.green,
+    return ScreenUtilInit(
+      designSize: const Size(375, 812), // iPhone 11 Pro dimensions
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          color: Colors.white,
+          debugShowCheckedModeBanner: false,
+          title: 'Turf and Park',
+          onGenerateRoute: (settings) {
+            switch (settings.name) {
+              case UserSignupStep1.id:
+                return PageTransition(
+                  child: const UserSignupStep1(),
+                  type: PageTransitionType.scale,
+                  curve: Curves.ease,
+                  alignment: Alignment.center,
+                  duration: const Duration(milliseconds: 300),
+                  settings: settings,
+                );
+              case TurfList.id:
+                return PageTransition(
+                  child: const TurfList(),
+                  type: PageTransitionType.scale,
+                  curve: Curves.ease,
+                  alignment: Alignment.center,
+                  duration: const Duration(milliseconds: 300),
+                  settings: settings,
+                );
+              case LoginUser.id:
+                return PageTransition(
+                  child: const LoginUser(),
+                  type: PageTransitionType.scale,
+                  curve: Curves.bounceIn,
+                  alignment: Alignment.center,
+                  duration: const Duration(milliseconds: 400),
+                  settings: settings,
+                );
+              default:
+                return null;
+            }
+          },
+          theme: ThemeData(
+            useMaterial3: true,
+            primarySwatch: colorCustom,
           ),
-      home: screenLoaded
-          ? Material(
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 38.0),
-                    child: Image.asset("assets/logo.png"),
+          home: screenLoaded
+              ? Material(
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 38.w), // Using .w for width
+                        child: Image.asset("assets/logo.png"),
+                      ),
+                      SizedBox(height: 70.h), // Using .h for height
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    height: 70,
-                  ),
-                  CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.green), //Color(0xFF65EB00),
-                  ),
-                ],
-              ),
-            )
-          : (userIsLoggedIn
-              ? (userType == "owner" ? OwnerTurfList() : TurfList())
-              : PreLoginUser()),
+                )
+              : (userIsLoggedIn
+                  ? (userType == "owner" ? OwnerTurfList() : TurfList())
+                  : PreLoginUser()),
+        );
+      },
+      child: Container(), // Empty container as child
     );
   }
 }
-
-// PreLoginUser()
-

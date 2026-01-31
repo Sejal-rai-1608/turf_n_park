@@ -25,6 +25,7 @@ class _ParkingListState extends State<ParkingList> {
   bool isLoading = false;
   String filter = "";
   TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -56,501 +57,688 @@ class _ParkingListState extends State<ParkingList> {
       showSnackbar(context, body['message']);
       onLogout(context);
     } else {
-      // showSnackbar(context, body['message']);
       parkingList = [];
       setState(() {});
     }
   }
 
+  void _showExitConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text(
+          "Exit App?",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.green.shade900,
+          ),
+        ),
+        content: Text("Are you sure you want to exit the app?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => exit(0),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text("Exit"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingStars(double rating) {
+    return Row(
+      children: List.generate(5, (index) {
+        return Icon(
+          index < rating.floor()
+              ? Icons.star_rounded
+              : Icons.star_outline_rounded,
+          size: 16,
+          color: index < rating.floor()
+              ? Colors.amber.shade600
+              : Colors.grey.shade400,
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () {
-      Get.dialog(
-        AlertDialog(
-          title: Text("Are you sure you want to exit?"),
-          actions: [
-            ElevatedButton(
-              child: Text("Yes"),
-              onPressed: () {
-                exit(0);
-              },
+      onWillPop: () async {
+        _showExitConfirmation();
+        return false;
+      },
+      child: Scaffold(
+        drawer: AppDrawer(),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.green.shade600,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+          title: GestureDetector(
+            onTap: () {
+              Navigator.of(context)
+                  .push(
+                      MaterialPageRoute(builder: (context) => SelectLocation()))
+                  .then((value) {
+                if (value == true) {
+                  getTurfs(context);
+                }
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.location_on_rounded,
+                      size: 18, color: Colors.white),
+                  SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      Constants.fullLocation.isNotEmpty
+                          ? Constants.fullLocation
+                          : "Select Location",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_drop_down_rounded, color: Colors.white),
+                ],
+              ),
             ),
-            ElevatedButton(
-              child: Text("No"),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+          ),
+          actions: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MyCart(
+                              update: () {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.shopping_cart_rounded,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 8,
+                  top: -5,
+                  child: Obx(
+                    () => c.count.value > 0
+                        ? Container(
+                            padding: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.red.shade600,
+                                  Colors.red.shade400
+                                ],
+                              ),
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: Text(
+                              c.count.value.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        : SizedBox(),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ).then((value) => {
-        if (value == true) {Navigator.of(context).pop(true)}
-      });
-      return Future.value(false);
-    },
-    child:Scaffold(
-      drawer: AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: Colors.green.shade600,
-        // toolbarHeight: 100,
-        iconTheme: IconThemeData(color: Colors.white),
-        elevation: 0.0,
-        title: Container(
-            child: Column(children: [
-          GestureDetector(
-              onTap: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(
-                        builder: (context) => SelectLocation()))
-                    .then((value) => {
-                          if (value == true)
-                            {
-                              setState(() {}),
-                              getTurfs(context)
-                              //  setState((){});
-                            }
-                        });
-              },
-              child: Container(
-                  child: Row(children: [
-                Text(
-                  Constants.fullLocation.length > 0
-                      ? Constants.fullLocation
-                      : "Select Location",
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
-                ),
-                Icon(Icons.keyboard_arrow_down)
-              ]))),
-        ])), //Text("Add New Prospect",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 18),),
-        actions: [
-          Stack(
+        body: SafeArea(
+          child: Column(
             children: [
-              IconButton(
-                  onPressed: () => {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => MyCart(
-                                  update: () {
-                                    setState(() {});
-                                  },
-                                )))
-                      },
-                  icon: Icon(Icons.shopping_cart_rounded)),
-              Positioned(
-                right: 5,
-                child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.red,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Obx(
-                        () => Text(
-                          c.count.value.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    )),
-              ),
-            ],
-          ),
-          SizedBox(
-            width: 10,
-          )
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(children: [
-            Container(
-              padding: EdgeInsets.only(left: 18, right: 18, bottom: 10),
-              color: Colors.green.shade600,
-              child: Container(
-                width: double.infinity,
-                height: 40,
+              // Search Bar
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(5)),
-                // alignment:Alignment.center,
-                child: Center(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
                   child: TextField(
-                    onChanged: (v) => {getTurfs(context)},
+                    onChanged: (v) => getTurfs(context),
                     controller: searchController,
                     decoration: InputDecoration(
-                        fillColor: Colors.white,
-                        prefixIcon: Icon(Icons.search),
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            /* Clear the search field */
-                            searchController.text = "";
-                            getTurfs(context);
-                          },
-                        ),
-                        hintText: 'Search',
-                        border: InputBorder.none),
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: Icon(Icons.search_rounded,
+                          color: Colors.grey.shade500),
+                      suffixIcon: searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear_rounded,
+                                  color: Colors.grey.shade500),
+                              onPressed: () {
+                                searchController.clear();
+                                getTurfs(context);
+                              },
+                            )
+                          : null,
+                      hintText: 'Search parking spaces...',
+                      hintStyle: TextStyle(color: Colors.grey.shade500),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 15),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Available Parkings",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  IconButton(
-                      onPressed: () {
+
+              // Header with Filter
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Available Parkings",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade900,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "${parkingList.length} spots found",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
                         showModalBottomSheet(
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(18.0))),
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(25)),
+                          ),
                           backgroundColor: Colors.white,
                           context: context,
-                          // isScrollControlled: false,
                           builder: (context) {
-                            return SingleChildScrollView(
-                              child: Wrap(
+                            return Container(
+                              padding: EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ListTile(
-                                    onTap: () {
-                                      filter = "2 Wheeler";
-                                      Navigator.of(context).pop();
-                                      getTurfs(context);
-                                    },
-                                    leading: Icon(Icons.pedal_bike),
-                                    title: Text('2 Wheeler'),
+                                  Center(
+                                    child: Container(
+                                      width: 40,
+                                      height: 4,
+                                      margin: EdgeInsets.only(bottom: 20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
                                   ),
-                                  ListTile(
-                                    onTap: () {
-                                      filter = "4 Wheeler";
-                                      Navigator.of(context).pop();
-                                      getTurfs(context);
-                                    },
-                                    leading: Icon(Icons.car_repair),
-                                    title: Text('4 Wheeler'),
+                                  Text(
+                                    "Filter by Vehicle Type",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade900,
+                                    ),
                                   ),
-                                  ListTile(
-                                    onTap: () {
-                                      filter = "";
-                                      Navigator.of(context).pop();
-                                      getTurfs(context);
-                                    },
-                                    leading: Icon(Icons.close),
-                                    title: Text('Clear Filter'),
-                                  ),
+                                  SizedBox(height: 20),
+                                  ...['2 Wheeler', '4 Wheeler', 'Clear Filter']
+                                      .map((option) {
+                                    return ListTile(
+                                      onTap: () {
+                                        setState(() {
+                                          if (option == 'Clear Filter') {
+                                            filter = "";
+                                          } else {
+                                            filter = option;
+                                          }
+                                        });
+                                        Navigator.of(context).pop();
+                                        getTurfs(context);
+                                      },
+                                      leading: option == '2 Wheeler'
+                                          ? Icon(Icons.motorcycle_rounded,
+                                              color: Colors.blue.shade700)
+                                          : option == '4 Wheeler'
+                                              ? Icon(
+                                                  Icons.directions_car_rounded,
+                                                  color: Colors.green.shade700)
+                                              : Icon(
+                                                  Icons.filter_alt_off_rounded,
+                                                  color: Colors.grey.shade600),
+                                      title: Text(
+                                        option,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade800,
+                                        ),
+                                      ),
+                                      trailing: filter == option
+                                          ? Icon(Icons.check_circle_rounded,
+                                              color: Colors.green.shade600)
+                                          : null,
+                                    );
+                                  }).toList(),
+                                  SizedBox(height: 20),
                                 ],
                               ),
                             );
                           },
                         );
                       },
-                      icon: Icon(
-                        Icons.filter_alt_rounded,
-                        size: 32,
-                      )),
-                  // IconButton(onPressed: (){}, icon:Icon(Icons.sort))
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.filter_alt_rounded,
+                              size: 20,
+                              color: Colors.green.shade700,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              filter.isEmpty ? "Filter" : filter,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildContent(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (isLoading) {
+      return ListView.builder(
+        itemCount: 4,
+        itemBuilder: (context, index) {
+          return Container(
+            margin: EdgeInsets.only(bottom: 16),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade200,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                height: 160,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    if (parkingList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.local_parking_rounded,
+              size: 80,
+              color: Colors.grey.shade300,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "No Parking Spaces Found",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Try changing your location or filters",
+              style: TextStyle(
+                color: Colors.grey.shade500,
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  filter = "";
+                  searchController.clear();
+                });
+                getTurfs(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade600,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text("Clear Filters"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 20),
+      itemCount: parkingList.length,
+      itemBuilder: (context, index) {
+        final parking = parkingList[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ParkingDetails(parking),
+              ),
+            );
+          },
+          child: Container(
+            margin: EdgeInsets.only(bottom: 16),
+            height: 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.15),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  // Background Image
+                  Positioned.fill(
+                    child: Image.network(
+                      parking['main_image'] ?? '',
+                      fit: BoxFit.fill,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey.shade200,
+                          child: Icon(
+                            Icons.local_parking_rounded,
+                            size: 60,
+                            color: Colors.grey.shade400,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Gradient Overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.2),
+                          Colors.black.withOpacity(0.5),
+                          Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Content
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Top Row - Title and Rating
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    parking['title'] ?? 'Parking Space',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_rounded,
+                                        size: 14,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          parking['address'] ?? '',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (parking['rating'] != null)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star_rounded,
+                                      size: 14,
+                                      color: Colors.amber.shade400,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      parking['rating'].toString(),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // Bottom Row - Type and Book Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Container(
+                            //   padding: EdgeInsets.symmetric(
+                            //       horizontal: 12, vertical: 6),
+                            //   decoration: BoxDecoration(
+                            //     color: Colors.white.withOpacity(0.9),
+                            //     borderRadius: BorderRadius.circular(10),
+                            //   ),
+                            //   child: Row(
+                            //     children: [
+                            // Icon(
+                            //   parking['parking_type']?.contains('2') ??
+                            //           false
+                            //       ? Icons.motorcycle_rounded
+                            //       : Icons.directions_car_rounded,
+                            //   size: 16,
+                            //   color: Colors.green.shade700,
+                            // ),
+                            // SizedBox(width: 6),
+                            // Text(
+                            //   parking['parking_type'] ?? 'Parking',
+                            //   style: TextStyle(
+                            //     fontSize: 12,
+                            //     fontWeight: FontWeight.w600,
+                            //     color: Colors.green.shade800,
+                            //   ),
+                            //       // ),
+                            //     ],
+                            //   ),
+                            // ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.green.shade600,
+                                    Colors.green.shade700,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.shade200,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                "Book Now",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            if (isLoading)
-              for (var d = 0; d <= 5; d++)
-                Container(
-                  child: Shimmer.fromColors(
-                    baseColor: Colors.grey.shade400,
-                    highlightColor: Colors.grey.shade600,
-                    enabled: true,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        color: Colors.white,
-                      ),
-                      height: 200,
-                      margin: EdgeInsets.all(10),
-                    ),
-                  ),
-                ),
-            if (!isLoading && parkingList.length == 0)
-              Container(
-                padding: EdgeInsets.only(top: 60),
-                alignment: Alignment.center,
-                child: Text("No Parkings Found",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-              ),
-            if (!isLoading)
-              for (var i = 0; i < parkingList.length; i++)
-                GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              ParkingDetails(parkingList[i])));
-                    },
-                    child: Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-
-                      height: 180,
-                      // width: MediaQuery.of(context).size.width*0.85,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(parkingList[i]['main_image']),
-                          fit: BoxFit.cover,
-                        ),
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      child: Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.black.withOpacity(0.7),
-                                    Colors.black.withOpacity(0.5),
-                                    Colors.black.withOpacity(0.3),
-                                    Colors.black.withOpacity(0.0),
-                                    Colors.black.withOpacity(0.0),
-                                    Colors.black.withOpacity(0.2),
-                                  ],
-                                ),
-                                // Colors.black.withOpacity(0.5)
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(children: [
-                                    Row(children: [
-                                      Text(" " + parkingList[i]['title'],
-                                          overflow: TextOverflow.clip,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            // backgroundColor: Colors.black45
-                                          ))
-                                    ])
-                                  ]),
-                                  Text(" " + parkingList[i]['address'],
-                                      style: TextStyle(color: Colors.white)),
-                                  SizedBox(
-                                    height: 55,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                          padding: EdgeInsets.all(5),
-                                          alignment: Alignment.bottomLeft,
-                                          child: SizedBox(
-                                            width: 95,
-                                            height: 40,
-                                            child: Container(
-                                              // width: ,
-                                              // color: Colors.black,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(14)),
-                                                  color: Colors.white),
-                                              alignment: Alignment.center,
-                                              child: Text("Book Now",
-                                                  style: TextStyle(
-                                                      fontSize: 17,
-                                                      color: Colors.black,
-                                                      fontWeight:
-                                                          FontWeight.w600)),
-                                            ),
-                                          )),
-                                      Container(
-                                          width: 100,
-                                          child:
-                                              parkingList[i]['rating'] != null
-                                                  ? Row(
-                                                      // mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Icon(
-                                                            int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    1
-                                                                ? Icons.star
-                                                                : Icons
-                                                                    .star_border,
-                                                            size: 17,
-                                                            color: int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    1
-                                                                ? Colors.yellow
-                                                                : Colors.white),
-                                                        Icon(
-                                                            int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    2
-                                                                ? Icons.star
-                                                                : Icons
-                                                                    .star_border,
-                                                            size: 17,
-                                                            color: int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    2
-                                                                ? Colors.yellow
-                                                                : Colors.white),
-                                                        Icon(
-                                                            int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    3
-                                                                ? Icons.star
-                                                                : Icons
-                                                                    .star_border,
-                                                            size: 17,
-                                                            color: int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    3
-                                                                ? Colors.yellow
-                                                                : Colors.white),
-                                                        Icon(
-                                                            int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    4
-                                                                ? Icons.star
-                                                                : Icons
-                                                                    .star_border,
-                                                            size: 17,
-                                                            color: int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    4
-                                                                ? Colors.yellow
-                                                                : Colors.white),
-                                                        Icon(
-                                                            int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    5
-                                                                ? Icons.star
-                                                                : Icons
-                                                                    .star_border,
-                                                            size: 17,
-                                                            color: int.parse(parkingList[i]
-                                                                            [
-                                                                            'rating']
-                                                                        .toString()) >=
-                                                                    5
-                                                                ? Colors.yellow
-                                                                : Colors.white),
-                                                      ],
-                                                    )
-                                                  : SizedBox.shrink())
-                                    ],
-                                  )
-                                ]),
-                          ),
-                        ],
-                      ),
-                    )),
-            //   SingleChildScrollView(
-            //   child: Container(
-            //     padding: EdgeInsets.symmetric(horizontal: 10),
-            //     child: Column(
-            //       children: [
-            //         SizedBox(height: 10,),
-            //         for(var i=0;i<10;i++)
-            //         GestureDetector(
-            //           child: Container(
-            //             margin:EdgeInsets.only(bottom:20),
-            //             height: 180,
-            //             // width: MediaQuery.of(context).size.width*0.85,
-            //             decoration: BoxDecoration(
-            //               image: DecorationImage(
-            //                 image: AssetImage("assets/turf.jpg"),
-            //                 fit: BoxFit.cover,
-            //               ),
-            //                borderRadius: BorderRadius.all(Radius.circular(20)),
-            //                 boxShadow: [
-            //                   BoxShadow(
-            //                     color: Colors.grey,
-            //                     blurRadius: 5.0, // soften the shadow
-            //                     spreadRadius: 2.0, //extend the shadow
-            //                     offset: Offset(
-            //                       6.0, // Move to right 10  horizontally
-            //                       6.0, // Move to bottom 10 Vertically
-            //                     ),
-            //                   )
-            //                 ]
-            //             ),
-            //             child: Container(
-            //               // color: Colors.black,
-            //               alignment: Alignment.center,
-            //               child: SizedBox(
-            //                 width:90,
-            //                 height:35,
-            //                 child: Container(
-            //                   // width: ,
-            //                   // color: Colors.black,
-            //                   decoration: BoxDecoration(
-            //                     borderRadius: BorderRadius.all(Radius.circular(8)),
-            //                     color: Colors.black
-            //                   ),
-            //                   alignment: Alignment.center,
-            //                   child: Text("Book Turf",
-            //                   style: TextStyle(
-            //                     fontSize: 17,
-            //                     color: Colors.white,
-            //                     fontWeight: FontWeight.w600
-            //                     )
-            //                   ),
-            //                 ),
-            //               )
-            //             ),
-            //           ),
-            //         ),
-
-            //       ],
-            //       ) /* add child content here */,
-            //   ),
-            // ),
-          ]),
-        ),
-      ),),
+          ),
+        );
+      },
     );
   }
-// Widget create
 }
