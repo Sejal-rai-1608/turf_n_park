@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart' hide CarouselController;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -25,38 +24,32 @@ class _ParkingDetailsState extends State<ParkingDetails> {
   _ParkingDetailsState(this.parkingDetails);
   var parkingDetails;
   Razorpay _razorpay = Razorpay();
-  int selectedDayIndex = 0;
   bool isLoading = false;
   bool isLoadingPayment = false;
   Map parkingData = {};
   TextEditingController startDateController = TextEditingController();
-  List slotList = [
-    {"id": "1", "name": "1 Months"},
-    {"id": "2", "name": "2 Months"},
-    {"id": "3", "name": "3 Months"},
-    {"id": "4", "name": "4 Months"},
-  ];
+  List slotList = [];
   var dropdownSelectedSlot = "1";
   int _currentCarouselIndex = 0;
 
-  var mid;
-  var orderId;
-  var amount;
-  var callBackUrl;
-  var testing;
-  var txnToken;
-  var payment_response;
-
   @override
   void initState() {
-    getParkingDetails(context);
     super.initState();
+    getParkingDetails(context);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
   }
 
   List<String> listImages = [];
 
   getParkingDetails(context) async {
-    print("widget.parkingDetails");
     slotList = [];
     listImages = [];
     var temp = widget.parkingDetails['slider_images'].toString().split(',');
@@ -72,7 +65,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
 
     if (response.statusCode == 200) {
       var list = body['message'];
-      print(list.toString());
       for (var i = 1; i < 25; i++)
         slotList.add(
             {"id": i.toString(), "name": i.toString() + " " + list['label']});
@@ -82,7 +74,6 @@ class _ParkingDetailsState extends State<ParkingDetails> {
     } else {
       showSnackbar(context, body['message']);
       parkingData = {};
-      setState(() {});
     }
     setState(() {
       isLoading = false;
@@ -117,6 +108,140 @@ class _ParkingDetailsState extends State<ParkingDetails> {
 
   convertDateTimeToString(dateTime) {
     return "${dateTime.toLocal()}".split(' ')[0];
+  }
+
+  // --- PAYMENT METHODS (RAZORPAY) ---
+  calculateAndPay() async {
+    if (dropdownSelectedSlot.isEmpty || startDateController.text.isEmpty) {
+      showSnackbar(context, "Please select booking period and start date");
+      return;
+    }
+
+    setState(() => isLoadingPayment = true);
+
+    try {
+      var amt = parkingDetails['rent'].split(".")[0];
+      var price = int.parse(dropdownSelectedSlot) * int.parse(amt);
+      await initPayment(price);
+    } catch (e) {
+      showSnackbar(context, "Error calculating amount");
+      setState(() => isLoadingPayment = false);
+    }
+  }
+
+  initPayment(amount) async {
+    try {
+      var url = Uri.parse(Constants.base_url + 'Service/create_razorpay_token');
+      var response = await http.post(url, body: {
+        "userToken": Constants.token,
+        "total_amount": amount.toString()
+      }).timeout(Duration(seconds: 30));
+
+      var body = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        var orderId = body['message'].toString();
+        var key = body['key_id'].toString();
+        payNow(key, orderId, amount);
+      } else if (response.statusCode == 401) {
+        showSnackbar(context, "Session expired");
+        onLogout(context);
+        setState(() => isLoadingPayment = false);
+      } else {
+        showSnackbar(context, body['message'] ?? "Payment setup failed");
+        setState(() => isLoadingPayment = false);
+      }
+    } on http.ClientException catch (e) {
+      showSnackbar(context, "Network error: ${e.message}");
+      setState(() => isLoadingPayment = false);
+    } catch (e) {
+      showSnackbar(context, "Payment error: ${e.toString()}");
+      setState(() => isLoadingPayment = false);
+    }
+  }
+
+  payNow(String key, String orderId, int amount) {
+    try {
+      var options = {
+        'key': key,
+        'amount': (amount * 100).toStringAsFixed(0), // Convert to paise
+        'name': 'Turf N Park',
+        'description': 'Parking Booking',
+        'order_id': orderId,
+        'prefill': {
+          'contact': Constants.mobile?.toString() ?? '',
+          'email': Constants.email?.toString() ?? ''
+        },
+        'theme': {'color': '#4CAF50'}
+      };
+
+      _razorpay.open(options);
+    } catch (e) {
+      showSnackbar(context, "Cannot open payment: ${e.toString()}");
+      setState(() => isLoadingPayment = false);
+    }
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    validatePaymentAndProcessCart(response);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    showSnackbar(
+        context, "Payment failed: ${response.message ?? 'Please try again'}");
+    setState(() => isLoadingPayment = false);
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    showSnackbar(context, "External wallet selected: ${response.walletName}");
+    setState(() => isLoadingPayment = false);
+  }
+
+  validatePaymentAndProcessCart(PaymentSuccessResponse res) async {
+    setState(() => isLoadingPayment = true);
+
+    try {
+      var amt = parkingDetails['rent'].split(".")[0];
+      var totalAmount = int.parse(dropdownSelectedSlot) * int.parse(amt);
+
+      var payload = {
+        "userToken": Constants.token,
+        "payment_id": res.paymentId.toString(),
+        "order_id": res.orderId.toString(),
+        "signature": res.signature.toString(),
+        "start_date": startDateController.text,
+        "end_date": startDateController.text,
+        "payment_type": parkingDetails['payment_type'],
+        "parking_id": parkingDetails['id'].toString(),
+        "qty": dropdownSelectedSlot,
+        "total_amount": totalAmount.toString()
+      };
+
+      var url = Uri.parse(Constants.base_url + 'Service/parking_booking');
+      var response =
+          await http.post(url, body: payload).timeout(Duration(seconds: 30));
+
+      var body = jsonDecode(response.body);
+
+      setState(() => isLoadingPayment = false);
+
+      if (response.statusCode == 200) {
+        showSnackbar(context, body['message'] ?? "Booking successful!");
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => MyBookings()));
+      } else if (response.statusCode == 401) {
+        showSnackbar(context, "Session expired");
+        onLogout(context);
+      } else {
+        showSnackbar(context, body['message'] ?? "Booking failed");
+      }
+    } on http.ClientException catch (e) {
+      showSnackbar(context, "Network error: ${e.message}");
+      setState(() => isLoadingPayment = false);
+    } catch (e) {
+      showSnackbar(context, "Error: ${e.toString()}");
+      setState(() => isLoadingPayment = false);
+    }
   }
 
   @override
@@ -787,7 +912,45 @@ class _ParkingDetailsState extends State<ParkingDetails> {
                                 ),
                               ),
 
-                              SizedBox(height: 10),
+                              SizedBox(height: 15),
+
+                              // Calculate Price Button
+                              if (dropdownSelectedSlot.isNotEmpty &&
+                                  startDateController.text.isNotEmpty)
+                                Container(
+                                  padding: EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.green.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Total Amount:",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                      Text(
+                                        "₹${(int.parse(dropdownSelectedSlot) * int.parse(parkingDetails['rent'].split(".")[0])).toString()}",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                              SizedBox(height: 20),
 
                               // Pay Button
                               isLoadingPayment
@@ -809,20 +972,7 @@ class _ParkingDetailsState extends State<ParkingDetails> {
                                       ),
                                     )
                                   : ElevatedButton(
-                                      onPressed: () {
-                                        if (dropdownSelectedSlot.isNotEmpty &&
-                                            startDateController
-                                                .text.isNotEmpty) {
-                                          parkingDetails['start_from'] =
-                                              startDateController.text;
-                                          parkingDetails['qty'] =
-                                              dropdownSelectedSlot;
-                                          calculateAndPay();
-                                        } else {
-                                          showSnackbar(context,
-                                              "Please select booking period and start date properly.");
-                                        }
-                                      },
+                                      onPressed: calculateAndPay,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.green.shade600,
                                         minimumSize: Size(double.infinity, 55),
@@ -838,13 +988,13 @@ class _ParkingDetailsState extends State<ParkingDetails> {
                                             MainAxisAlignment.center,
                                         children: [
                                           Icon(
-                                            Icons.lock_rounded,
+                                            Icons.payment_rounded,
                                             size: 20,
                                             color: Colors.white,
                                           ),
                                           SizedBox(width: 10),
                                           Text(
-                                            "PAY & BOOK NOW",
+                                            "PAY WITH RAZORPAY",
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -857,6 +1007,37 @@ class _ParkingDetailsState extends State<ParkingDetails> {
                                     ),
 
                               SizedBox(height: 10),
+
+                              // Payment Note
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                margin: EdgeInsets.only(top: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border:
+                                      Border.all(color: Colors.blue.shade100),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.security_rounded,
+                                      color: Colors.blue.shade700,
+                                      size: 18,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        "Secure payment via Razorpay. Your payment details are protected.",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.blue.shade800,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -872,181 +1053,5 @@ class _ParkingDetailsState extends State<ParkingDetails> {
         ),
       ),
     );
-  }
-
-  // All your existing methods remain exactly the same
-  calculateAndPay() {
-    setState(() {
-      isLoadingPayment = true;
-    });
-    var amt = parkingDetails['rent'].split(".")[0];
-    var price = int.parse(parkingDetails['qty']) * int.parse(amt);
-    initPaymentPaytm(price);
-  }
-
-  initPaymentPaytm(amount) async {
-    var url = Uri.parse(Constants.base_url + 'Service/create_paytm_token');
-
-    var response = await http.post(url, body: {
-      "userToken": Constants.token,
-      "total_amount": amount.toString()
-    });
-
-    var body = jsonDecode(response.body);
-
-    setState(() {
-      isLoading = false;
-    });
-    if (response.statusCode == 200) {
-      var result = body['message'];
-      mid = body['mid'];
-      orderId = body['orderId'];
-      amount = body['amount'];
-      callBackUrl = body['callBackUrl'];
-      testing = body['testing'];
-      txnToken = result['body']['txnToken'];
-    } else if (response.statusCode == 401) {
-      showSnackbar(context, body['message']);
-      onLogout(context);
-    } else {
-      showSnackbar(context, body['message']);
-      setState(() {});
-    }
-  }
-
-  initPayment(amount) async {
-    setState(() {
-      isLoadingPayment = true;
-    });
-    var url = Uri.parse(Constants.base_url + 'Service/create_razorpay_token');
-    var response = await http.post(url, body: {
-      "userToken": Constants.token,
-      "total_amount": amount.toString()
-    });
-    var body = jsonDecode(response.body);
-
-    setState(() {
-      isLoadingPayment = false;
-    });
-    if (response.statusCode == 200) {
-      var orderId = body['message'];
-      var key = body['key_id'];
-      payNow(key, orderId, amount);
-    } else if (response.statusCode == 401) {
-      showSnackbar(context, body['message']);
-      onLogout(context);
-    } else {
-      showSnackbar(context, body['message']);
-      setState(() {});
-    }
-  }
-
-  payNow(key, orderId, amount) {
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
-    var options = {
-      'key': key,
-      'order_id': orderId,
-      'amount': amount * 100,
-      'name': 'Turf N Park',
-      'description': 'Parking Booking',
-      'prefill': {
-        'contact': Constants.mobile.toString(),
-        'email': Constants.email.toString()
-      }
-    };
-    _razorpay.open(options);
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    validatePaymentAndProcessCart(response);
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    showSnackbar(context, "Your payment is failed. Please try again");
-    Navigator.of(context).pop();
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    // Do something when an external wallet was selected
-  }
-
-  validatePaymentAndProcessCart(res) async {
-    setState(() {
-      isLoadingPayment = true;
-    });
-    var payload = {
-      "userToken": Constants.token,
-      "payment_id": res.paymentId.toString(),
-      "order_id": res.orderId.toString(),
-      "signature": res.signature.toString(),
-      "start_date": startDateController.text,
-      "end_date": startDateController.text,
-      "payment_type": parkingDetails['payment_type'],
-      "parking_id": parkingDetails['id'].toString(),
-      "qty": parkingDetails['qty'].toString(),
-    };
-
-    var url = Uri.parse(Constants.base_url + 'Service/parking_booking');
-    var response = await http.post(url, body: payload);
-    var body = jsonDecode(response.body);
-
-    setState(() {
-      isLoadingPayment = false;
-    });
-    if (response.statusCode == 200) {
-      showSnackbar(context, body['message']);
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => ParkingList()));
-    } else if (response.statusCode == 401) {
-      showSnackbar(context, body['message']);
-      onLogout(context);
-    } else {
-      showSnackbar(context, body['message']);
-      setState(() {});
-    }
-  }
-
-  validatePaytmPaymentAndProcessCart(res) async {
-    setState(() {
-      isLoadingPayment = true;
-    });
-    var payload = {
-      "userToken": Constants.token,
-      "start_date": startDateController.text,
-      "end_date": startDateController.text,
-      "payment_type": parkingDetails['payment_type'],
-      "parking_id": parkingDetails['id'].toString(),
-      "qty": parkingDetails['qty'].toString(),
-      "TXNID": res['response']['TXNID'].toString(),
-      "ORDERID": res['response']['ORDERID'].toString(),
-      "STATUS": res['response']['STATUS'].toString(),
-      "CHECKSUMHASH": res['response']['CHECKSUMHASH'].toString(),
-      "order_id": orderId,
-      "paytm_response": res.toString()
-    };
-
-    var url = Uri.parse(Constants.base_url + 'Service/parking_booking_paytm');
-    var response = await http.post(url, body: payload);
-
-    var body = jsonDecode(response.body);
-
-    setState(() {
-      isLoadingPayment = false;
-    });
-    if (response.statusCode == 200) {
-      showSnackbar(context, body['message']);
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MyBookings()));
-    } else if (response.statusCode == 401) {
-      showSnackbar(context, body['message']);
-      onLogout(context);
-    } else {
-      showSnackbar(context, body['message']);
-      setState(() {});
-    }
   }
 }

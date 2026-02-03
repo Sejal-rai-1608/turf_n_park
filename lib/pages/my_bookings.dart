@@ -258,333 +258,339 @@ class _MyBookingsState extends State<MyBookings> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green.shade500,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "My Bookings",
-          style: TextStyle(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          // padding:EdgeInsets.symmetric(horizontal:10),
-          color: Colors.white,
-          child: Column(
-            children: [
-              // SizedBox(height: 10,),
-              // Row(
-              //     // alignment: Alignment.topRight,
-              //     // crossAxisAlignment:CrossAxisAlignment.,
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     children: [
-              //       Container(
-              //           padding: EdgeInsets.only(left: 15, top: 10),
-              //           child: Text("My Bookings",
-              //               style: TextStyle(
-              //                   color: Colors.black,
-              //                   fontWeight: FontWeight.bold,
-              //                   fontSize: 24))),
-              //       Container(
-              //         padding: EdgeInsets.only(right: 20, top: 10),
-              //         alignment: Alignment.centerRight,
-              //         child: Container(
-              //           width: 34,
-              //           height: 34,
-              //           alignment: Alignment.center,
-              //           decoration: BoxDecoration(
-              //               color: Colors.black,
-              //               borderRadius:
-              //                   BorderRadius.all(Radius.circular(17))
-              //               // shape:BoxShape.circle
-              //               ),
-              //           child: IconButton(
-              //             icon: Icon(Icons.close),
-              //             iconSize: 18,
-              //             onPressed: () {
-              //               Navigator.of(context).pop();
-              //             },
-              //             color: Colors.white,
-              //           ),
-              //         ),
-              //       ),
-              //       // SizedBox(width: 20,),
-              //     ]),
-              SizedBox(
-                height: 30,
+    return SafeArea(
+      top: false,
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.green.shade500,
+            elevation: 0,
+            centerTitle: true,
+            title: Text(
+              "My Bookings",
+              style: TextStyle(color: Colors.white),
+            ),
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
               ),
-              SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Form(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (isLoading)
-                          for (var i = 0; i < 8; i++)
-                            Container(
-                              child: Shimmer.fromColors(
-                                baseColor: Colors.grey.shade400,
-                                highlightColor: Colors.grey.shade600,
-                                enabled: true,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20)),
-                                    color: Colors.white,
-                                  ),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.90,
-                                  height: 200,
-                                  margin: EdgeInsets.all(10),
-                                ),
-                              ),
-                            ),
-                        if (!isLoading)
-                          if (bookings.length == 0)
-                            Padding(
-                              padding: EdgeInsets.only(top: Get.height / 3),
-                              child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("No Bookings Found",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 18,
-                                      ))),
-                            ),
-                        for (var i = 0; i < bookings.length; i++)
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .push(MaterialPageRoute(
-                                      builder: (context) =>
-                                          BookingDetails(bookings[i])))
-                                  .then((value) => {
-                                        if (value == true)
-                                          {getBookings(context)}
-                                      });
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                //  Container(width:40,child: Icon(Icons.label_important_outline,color: Colors.blue,)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Container(
+              // padding:EdgeInsets.symmetric(horizontal:10),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  // SizedBox(height: 10,),
+                  // Row(
+                  //     // alignment: Alignment.topRight,
+                  //     // crossAxisAlignment:CrossAxisAlignment.,
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Container(
+                  //           padding: EdgeInsets.only(left: 15, top: 10),
+                  //           child: Text("My Bookings",
+                  //               style: TextStyle(
+                  //                   color: Colors.black,
+                  //                   fontWeight: FontWeight.bold,
+                  //                   fontSize: 24))),
+                  //       Container(
+                  //         padding: EdgeInsets.only(right: 20, top: 10),
+                  //         alignment: Alignment.centerRight,
+                  //         child: Container(
+                  //           width: 34,
+                  //           height: 34,
+                  //           alignment: Alignment.center,
+                  //           decoration: BoxDecoration(
+                  //               color: Colors.black,
+                  //               borderRadius:
+                  //                   BorderRadius.all(Radius.circular(17))
+                  //               // shape:BoxShape.circle
+                  //               ),
+                  //           child: IconButton(
+                  //             icon: Icon(Icons.close),
+                  //             iconSize: 18,
+                  //             onPressed: () {
+                  //               Navigator.of(context).pop();
+                  //             },
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       // SizedBox(width: 20,),
+                  //     ]),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  SingleChildScrollView(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Form(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (isLoading)
+                              for (var i = 0; i < 8; i++)
                                 Container(
-                                    decoration: BoxDecoration(
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.grey.shade400,
+                                    highlightColor: Colors.grey.shade600,
+                                    enabled: true,
+                                    child: Container(
+                                      decoration: BoxDecoration(
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(20)),
-                                        // boxShadow: [
-                                        //   BoxShadow(
-                                        //     color: Colors.grey.shade400,
-                                        //     blurRadius:
-                                        //         5.0, // soften the shadow
-                                        //     spreadRadius:
-                                        //         2.0, //extend the shadow
-                                        //     offset: Offset(
-                                        //       6.0, // Move to right 10  horizontally
-                                        //       6.0, // Move to bottom 10 Vertically
-                                        //     ),
-                                        //   )
-                                        // ],
-                                        color: Colors.grey.shade200),
-                                    width: MediaQuery.of(context).size.width *
-                                        0.85,
-                                    margin: EdgeInsets.symmetric(vertical: 10),
-                                    padding: EdgeInsets.all(10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        if (bookings[i]['is_cancelled'] == "1")
+                                        color: Colors.white,
+                                      ),
+                                      width: MediaQuery.of(context).size.width *
+                                          0.90,
+                                      height: 200,
+                                      margin: EdgeInsets.all(10),
+                                    ),
+                                  ),
+                                ),
+                            if (!isLoading)
+                              if (bookings.length == 0)
+                                Padding(
+                                  padding: EdgeInsets.only(top: Get.height / 3),
+                                  child: Container(
+                                      alignment: Alignment.center,
+                                      child: Text("No Bookings Found",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 18,
+                                          ))),
+                                ),
+                            for (var i = 0; i < bookings.length; i++)
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context)
+                                      .push(MaterialPageRoute(
+                                          builder: (context) =>
+                                              BookingDetails(bookings[i])))
+                                      .then((value) => {
+                                            if (value == true)
+                                              {getBookings(context)}
+                                          });
+                                },
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border:
+                                        Border.all(color: Colors.grey.shade200),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // TOP ROW (Image + Title + Cancel Chip)
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
                                           Container(
-                                              decoration: BoxDecoration(
-                                                  // border:Border.all(color: Colors.red.shade400),
-                                                  // borderRadius: BorderRadius.all(Radius.circular(8))
-                                                  ),
-                                              padding: EdgeInsets.all(4),
-                                              alignment: Alignment.centerRight,
-                                              child: Text(
-                                                "Cancelled",
-                                                style: TextStyle(
-                                                  color: Colors.red.shade400,
-                                                ),
-                                              )),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Row(
-                                          // mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              width: 65,
-                                              height: 65,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.grey,
-                                                  image: DecorationImage(
-                                                    image: NetworkImage(
-                                                        bookings[i]['image']),
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                  // borderRadius: BorderRadius.all(Radius.circular(17)),
-                                                  shape: BoxShape.circle),
+                                            height: 60,
+                                            width: 60,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                  color: Colors.grey.shade200,
+                                                  width: 2),
+                                              image: DecorationImage(
+                                                image: NetworkImage(
+                                                    bookings[i]['image']),
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                if (bookings[i]['title'] !=
-                                                    null)
-                                                  Text(bookings[i]['title'],
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 18)),
-                                                SizedBox(
-                                                  height: 10,
+                                                Text(
+                                                  bookings[i]['title'] ?? "",
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
                                                 ),
-                                                if (bookings[i]['address'] !=
-                                                    null)
-                                                  Container(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.85 -
-                                                              98,
-                                                      child: Text(
-                                                          bookings[i]
-                                                              ['address'],
-                                                          style: TextStyle(
-                                                              fontSize: 13,
-                                                              color: Colors
-                                                                  .grey))),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  bookings[i]['address'] ?? "",
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
                                               ],
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Container(
-                                            child: Text(
-                                          "Booked On : " +
-                                              bookings[i]['date'].toString(),
-                                        )),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              85,
-                                          child: Text(
-                                              "Amount : Rs." +
-                                                  bookings[i]['amount']
-                                                      .toString(),
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 15)),
-                                        ),
-                                        SizedBox(
-                                          height: 3,
-                                        ),
-                                        bookings[i]['used'] == true
-                                            ? Container(
-                                                padding: EdgeInsets.only(
-                                                    left: 10, right: 10),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    GestureDetector(
-                                                        onTap: () {
-                                                          submitRating(
-                                                              bookings[i]);
-                                                        },
-                                                        child: Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    6),
-                                                            decoration: BoxDecoration(
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .red
-                                                                        .shade400)),
-                                                            child: Text(
-                                                                "Add Review",
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .normal,
-                                                                    fontSize:
-                                                                        13,
-                                                                    color: Colors
-                                                                        .red
-                                                                        .shade400)))),
-                                                    Text("View Details",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .normal,
-                                                            fontSize: 13,
-                                                            color: Colors
-                                                                .grey.shade700))
-                                                  ],
-                                                ),
-                                              )
-                                            : Container(
-                                                alignment: Alignment.topRight,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width -
-                                                    85,
-                                                child: Text("View Details",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        fontSize: 13,
-                                                        color: Colors
-                                                            .grey.shade700)),
+                                            ),
+                                          ),
+                                          if (bookings[i]['is_cancelled'] ==
+                                              "1")
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red.shade50,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                    color: Colors.red.shade200),
                                               ),
-                                        SizedBox(
-                                          height: 8,
-                                        )
-                                      ],
-                                    ))
-                              ],
-                            ),
-                          )
-                      ],
+                                              child: Text(
+                                                "Cancelled",
+                                                style: TextStyle(
+                                                  color: Colors.red.shade600,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 14),
+                                      Divider(color: Colors.grey.shade200),
+                                      const SizedBox(height: 10),
+
+                                      // BOOKED ON + AMOUNT ROW
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(Icons.calendar_month,
+                                                  size: 18,
+                                                  color: Colors.grey.shade600),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "Booked On: ${bookings[i]['date']}",
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green.shade50,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                  color: Colors.green.shade200),
+                                            ),
+                                            child: Text(
+                                              "₹ ${bookings[i]['amount']}",
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.green.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 12),
+
+                                      // ACTIONS
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          if (bookings[i]['used'] == true)
+                                            GestureDetector(
+                                              onTap: () {
+                                                submitRating(bookings[i]);
+                                              },
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 10),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red.shade50,
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                      color:
+                                                          Colors.red.shade200),
+                                                ),
+                                                child: Text(
+                                                  "Add Review",
+                                                  style: TextStyle(
+                                                    color: Colors.red.shade600,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          else
+                                            const SizedBox(),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "View Details",
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.grey.shade700,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Icon(Icons.arrow_forward_ios,
+                                                  size: 14,
+                                                  color: Colors.grey.shade600),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              )
-            ],
-          ) /* add child content here */,
+                  )
+                ],
+              ) /* add child content here */,
+            ),
+          ),
         ),
       ),
     );

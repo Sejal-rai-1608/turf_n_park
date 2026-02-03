@@ -158,7 +158,7 @@ class _TurfDetailsState extends State<TurfDetails> {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
+            bottom: Radius.circular(20.w),
           ),
         ),
         actions: [
@@ -172,27 +172,28 @@ class _TurfDetailsState extends State<TurfDetails> {
                           )))
                 },
                 icon: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.shopping_cart_rounded, color: Colors.white),
+                  child: Icon(Icons.shopping_cart_rounded,
+                      color: Colors.white, size: 20.w),
                 ),
               ),
               Positioned(
-                right: 8,
-                top: 8,
+                right: 8.w,
+                top: 8.h,
                 child: Container(
-                  padding: EdgeInsets.all(4),
+                  padding: EdgeInsets.all(4.w),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.red.shade500,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.red.shade300,
-                        blurRadius: 3,
-                        spreadRadius: 1,
+                        blurRadius: 3.w,
+                        spreadRadius: 1.w,
                       ),
                     ],
                   ),
@@ -201,7 +202,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                       c.count.toString(),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -213,14 +214,14 @@ class _TurfDetailsState extends State<TurfDetails> {
         ],
         leading: IconButton(
           icon: Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.arrow_back_ios_new,
-              size: 18,
+              size: 18.w,
               color: Colors.white,
             ),
           ),
@@ -233,7 +234,7 @@ class _TurfDetailsState extends State<TurfDetails> {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 18,
+            fontSize: 18.sp,
           ),
         ),
         centerTitle: true,
@@ -246,7 +247,7 @@ class _TurfDetailsState extends State<TurfDetails> {
             children: [
               // Enhanced Carousel Slider
               Container(
-                height: MediaQuery.of(context).size.height * 0.28,
+                height: 0.28.sh,
                 width: double.infinity,
                 child: Stack(
                   children: [
@@ -257,7 +258,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                         autoPlayAnimationDuration: Duration(milliseconds: 800),
                         enlargeCenterPage: true,
                         viewportFraction: 1.0,
-                        height: MediaQuery.of(context).size.height * 0.28,
+                        height: 0.28.sh,
                         onPageChanged: (index, reason) {
                           setState(() {
                             _currentCarouselIndex = index;
@@ -274,26 +275,26 @@ class _TurfDetailsState extends State<TurfDetails> {
                                   builder: (context) {
                                     return Dialog(
                                       backgroundColor: Colors.transparent,
-                                      insetPadding: EdgeInsets.all(20),
+                                      insetPadding: EdgeInsets.all(20.w),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Container(
                                             decoration: BoxDecoration(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(20.w),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color: Colors.black
                                                       .withOpacity(0.3),
-                                                  blurRadius: 30,
-                                                  spreadRadius: 5,
+                                                  blurRadius: 30.w,
+                                                  spreadRadius: 5.w,
                                                 ),
                                               ],
                                             ),
                                             child: ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(20.w),
                                               child: ZoomOverlay(
                                                 twoTouchOnly: true,
                                                 child: Container(
@@ -310,7 +311,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(height: 15),
+                                          SizedBox(height: 15.h),
                                           ElevatedButton(
                                             onPressed: () {
                                               Navigator.pop(context);
@@ -321,15 +322,17 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                   Colors.green.shade700,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                    BorderRadius.circular(10.w),
                                               ),
                                               padding: EdgeInsets.symmetric(
-                                                  horizontal: 30, vertical: 12),
+                                                  horizontal: 30.w,
+                                                  vertical: 12.h),
                                             ),
                                             child: Text(
                                               "Close",
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w600,
+                                                fontSize: 14.sp,
                                               ),
                                             ),
                                           ),
@@ -376,7 +379,7 @@ class _TurfDetailsState extends State<TurfDetails> {
 
                     // Image Indicator
                     Positioned(
-                      bottom: 15,
+                      bottom: 15.h,
                       left: 0,
                       right: 0,
                       child: Row(
@@ -384,19 +387,20 @@ class _TurfDetailsState extends State<TurfDetails> {
                         children: listImages.asMap().entries.map((entry) {
                           return AnimatedContainer(
                             duration: Duration(milliseconds: 300),
-                            width: _currentCarouselIndex == entry.key ? 20 : 8,
-                            height: 8,
-                            margin: EdgeInsets.symmetric(horizontal: 3),
+                            width:
+                                _currentCarouselIndex == entry.key ? 20.w : 8.w,
+                            height: 8.h,
+                            margin: EdgeInsets.symmetric(horizontal: 3.w),
                             decoration: BoxDecoration(
                               color: _currentCarouselIndex == entry.key
                                   ? Colors.white
                                   : Colors.white.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(4.w),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 3,
-                                  offset: Offset(0, 1),
+                                  blurRadius: 3.w,
+                                  offset: Offset(0, 1.h),
                                 ),
                               ],
                             ),
@@ -407,20 +411,20 @@ class _TurfDetailsState extends State<TurfDetails> {
 
                     // Image Counter
                     Positioned(
-                      top: 15,
-                      right: 15,
+                      top: 15.h,
+                      right: 15.w,
                       child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 6.h),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.w),
                         ),
                         child: Text(
                           '${_currentCarouselIndex + 1}/${listImages.length}',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -432,7 +436,7 @@ class _TurfDetailsState extends State<TurfDetails> {
 
               // Content Container with modern design
               Positioned(
-                top: MediaQuery.of(context).size.height * 0.23,
+                top: 0.23.sh,
                 bottom: 0,
                 left: 0,
                 right: 0,
@@ -440,28 +444,28 @@ class _TurfDetailsState extends State<TurfDetails> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                      topLeft: Radius.circular(30.w),
+                      topRight: Radius.circular(30.w),
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 25,
-                        spreadRadius: 5,
-                        offset: Offset(0, -5),
+                        blurRadius: 25.w,
+                        spreadRadius: 5.w,
+                        offset: Offset(0, -5.h),
                       ),
                     ],
                   ),
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
                     child: Padding(
-                      padding: EdgeInsets.all(20),
+                      padding: EdgeInsets.all(20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Turf Name and Price - Modern Design
                           Container(
-                            margin: EdgeInsets.only(bottom: 10),
+                            margin: EdgeInsets.only(bottom: 10.h),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,30 +478,33 @@ class _TurfDetailsState extends State<TurfDetails> {
                                       Text(
                                         turfData['turf_name'],
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 20.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green.shade900,
                                           height: 1.2,
                                         ),
                                       ),
-                                      SizedBox(height: 8),
+                                      SizedBox(height: 8.h),
                                       Row(
                                         children: [
                                           Icon(
                                             Icons.location_on,
-                                            size: 18,
+                                            size: 18.w,
                                             color: Colors.grey.shade600,
                                           ),
-                                          SizedBox(width: 6),
-                                          Text(
-                                            turfData['address'],
-                                            style: TextStyle(
-                                              color: Colors.grey.shade700,
-                                              fontSize: 14,
+                                          SizedBox(width: 6.w),
+                                          Flexible(
+                                            child: Text(
+                                              turfData['address'],
+                                              style: TextStyle(
+                                                color: Colors.grey.shade700,
+                                                fontSize: 14.sp,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
                                           ),
+                                          SizedBox(width: 6.w),
                                           Container(
                                             height: 15.h,
                                             width: 1.w,
@@ -506,7 +513,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                           Icon(
                                             Icons.star,
                                             color: Colors.amber.shade700,
-                                            size: 18,
+                                            size: 18.w,
                                           ),
                                           Text(
                                             turfData['rating'] == null
@@ -515,7 +522,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                             style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               color: Colors.amber.shade900,
-                                              fontSize: 15,
+                                              fontSize: 15.sp,
                                             ),
                                           ),
                                         ],
@@ -523,10 +530,10 @@ class _TurfDetailsState extends State<TurfDetails> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                SizedBox(width: 10.w),
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 10),
+                                      horizontal: 16.w, vertical: 10.h),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
@@ -536,12 +543,12 @@ class _TurfDetailsState extends State<TurfDetails> {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(12.w),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.green.shade200,
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
+                                        blurRadius: 10.w,
+                                        offset: Offset(0, 4.h),
                                       ),
                                     ],
                                   ),
@@ -550,7 +557,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                         (int.parse(turfData['hourly_rent']))
                                             .toString(),
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -565,20 +572,20 @@ class _TurfDetailsState extends State<TurfDetails> {
                           if (turfDetails['amenities'] != null &&
                               turfDetails['amenities'].length > 0)
                             Container(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10.w),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20.w),
                                 border: Border.all(
                                   color: Colors.grey.shade100,
-                                  width: 1.5,
+                                  width: 1.5.w,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(0.05),
-                                    blurRadius: 15,
-                                    spreadRadius: 5,
-                                    offset: Offset(0, 5),
+                                    blurRadius: 15.w,
+                                    spreadRadius: 5.w,
+                                    offset: Offset(0, 5.h),
                                   ),
                                 ],
                               ),
@@ -588,23 +595,23 @@ class _TurfDetailsState extends State<TurfDetails> {
                                   Row(
                                     children: [
                                       Container(
-                                        padding: EdgeInsets.all(10),
+                                        padding: EdgeInsets.all(10.w),
                                         decoration: BoxDecoration(
                                           color: Colors.blue.shade50,
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(12.w),
                                         ),
                                         child: Icon(
                                           Icons.emoji_events_rounded,
                                           color: Colors.blue.shade700,
-                                          size: 15,
+                                          size: 15.w,
                                         ),
                                       ),
-                                      SizedBox(width: 12),
+                                      SizedBox(width: 12.w),
                                       Text(
                                         "Amenities & Facilities",
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green.shade900,
                                         ),
@@ -612,7 +619,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                     ],
                                   ),
 
-                                  SizedBox(height: 16),
+                                  SizedBox(height: 16.h),
 
                                   // Grid view for amenities
                                   GridView.builder(
@@ -621,7 +628,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                     gridDelegate:
                                         SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
-                                      crossAxisSpacing: 10,
+                                      crossAxisSpacing: 10.w,
                                       childAspectRatio: 5,
                                     ),
                                     itemCount: turfDetails['amenities'].length,
@@ -630,10 +637,10 @@ class _TurfDetailsState extends State<TurfDetails> {
                                         children: [
                                           Icon(
                                             Icons.check_circle_rounded,
-                                            size: 18,
+                                            size: 18.w,
                                             color: Colors.green.shade600,
                                           ),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: 8.w),
                                           Expanded(
                                             child: Text(
                                               turfDetails['amenities'][index]
@@ -642,9 +649,9 @@ class _TurfDetailsState extends State<TurfDetails> {
                                               style: TextStyle(
                                                 color: Colors.green.shade800,
                                                 fontWeight: FontWeight.w500,
-                                                fontSize: 13,
+                                                fontSize: 13.sp,
                                               ),
-                                              maxLines: 2,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
@@ -652,66 +659,18 @@ class _TurfDetailsState extends State<TurfDetails> {
                                       );
                                     },
                                   ),
-
-                                  // Or use Wrap layout if you prefer
-                                  /*
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: turfDetails['amenities'].map<Widget>((amenity) {
-            return Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.green.shade50,
-                    Colors.blue.shade50,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.green.shade200,
-                  width: 1.5,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    size: 16,
-                    color: Colors.green.shade600,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    amenity['text'] ?? '',
-                    style: TextStyle(
-                      color: Colors.green.shade800,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-        */
                                 ],
                               ),
                             ),
 
-// If no amenities, show a message
+                          // If no amenities, show a message
                           if (turfDetails['amenities'] == null ||
                               turfDetails['amenities'].length == 0)
                             Container(
-                              padding: EdgeInsets.all(20),
+                              padding: EdgeInsets.all(20.w),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20.w),
                                 border: Border.all(
                                   color: Colors.grey.shade200,
                                 ),
@@ -721,14 +680,16 @@ class _TurfDetailsState extends State<TurfDetails> {
                                   Icon(
                                     Icons.emoji_events_outlined,
                                     color: Colors.grey.shade500,
+                                    size: 18.w,
                                   ),
-                                  SizedBox(width: 12),
+                                  SizedBox(width: 12.w),
                                   Expanded(
                                     child: Text(
                                       "No amenities listed",
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontWeight: FontWeight.w500,
+                                        fontSize: 14.sp,
                                       ),
                                     ),
                                   ),
@@ -740,19 +701,19 @@ class _TurfDetailsState extends State<TurfDetails> {
 
                           // Owner Section - Enhanced
                           Container(
-                            padding: EdgeInsets.all(10),
+                            padding: EdgeInsets.all(10.w),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(16.w),
                               border: Border.all(
                                 color: Colors.grey.shade200,
-                                width: 1.5,
+                                width: 1.5.w,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.shade100,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4),
+                                  blurRadius: 10.w,
+                                  offset: Offset(0, 4.h),
                                 ),
                               ],
                             ),
@@ -761,16 +722,17 @@ class _TurfDetailsState extends State<TurfDetails> {
                                 Text(
                                   "OWNER",
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.green.shade600,
                                     letterSpacing: 1.5,
                                   ),
                                 ),
                                 Container(
-                                  height: 24,
-                                  width: 1,
-                                  margin: EdgeInsets.symmetric(horizontal: 12),
+                                  height: 24.h,
+                                  width: 1.w,
+                                  margin:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   color: Colors.grey.shade300,
                                 ),
                                 Expanded(
@@ -779,11 +741,11 @@ class _TurfDetailsState extends State<TurfDetails> {
                                           baseColor: Colors.grey.shade200,
                                           highlightColor: Colors.grey.shade100,
                                           child: Container(
-                                            height: 20,
+                                            height: 20.h,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(4),
+                                                  BorderRadius.circular(4.w),
                                             ),
                                           ),
                                         )
@@ -791,7 +753,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                           turfDetails['turf_owner_name'] ??
                                               'Loading...',
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 16.sp,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.green.shade900,
                                           ),
@@ -814,13 +776,13 @@ class _TurfDetailsState extends State<TurfDetails> {
                                   Icon(
                                     Icons.calendar_today_rounded,
                                     color: Colors.green.shade700,
-                                    size: 20,
+                                    size: 20.w,
                                   ),
-                                  SizedBox(width: 10),
+                                  SizedBox(width: 10.w),
                                   Text(
                                     "Availability",
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.green.shade900,
                                     ),
@@ -838,9 +800,10 @@ class _TurfDetailsState extends State<TurfDetails> {
                                       if (isLoading)
                                         for (var i = 0; i <= 6; i++)
                                           Container(
-                                            width: 60,
-                                            height: 60,
-                                            margin: EdgeInsets.only(right: 10),
+                                            width: 60.w,
+                                            height: 60.w,
+                                            margin:
+                                                EdgeInsets.only(right: 10.w),
                                             child: Shimmer.fromColors(
                                               baseColor: Colors.grey.shade200,
                                               highlightColor:
@@ -849,7 +812,8 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(
+                                                          12.w),
                                                 ),
                                               ),
                                             ),
@@ -868,29 +832,30 @@ class _TurfDetailsState extends State<TurfDetails> {
                                               );
                                             },
                                             child: Container(
-                                              width: 60,
-                                              height: 60,
+                                              width: 60.w,
+                                              height: 60.w,
                                               margin:
-                                                  EdgeInsets.only(right: 10),
+                                                  EdgeInsets.only(right: 10.w),
                                               decoration: BoxDecoration(
                                                 color: selectedDayIndex == i
                                                     ? Colors.green.shade500
                                                     : Colors.grey.shade50,
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(12.w),
                                                 border: Border.all(
                                                   color: selectedDayIndex == i
                                                       ? Colors.green.shade500
                                                       : Colors.grey.shade300,
-                                                  width: 1.5,
+                                                  width: 1.5.w,
                                                 ),
                                                 boxShadow: selectedDayIndex == i
                                                     ? [
                                                         BoxShadow(
                                                           color: Colors
                                                               .green.shade200,
-                                                          blurRadius: 10,
-                                                          offset: Offset(0, 4),
+                                                          blurRadius: 10.w,
+                                                          offset:
+                                                              Offset(0, 4.h),
                                                         ),
                                                       ]
                                                     : null,
@@ -904,7 +869,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                             ['month'] ??
                                                         '',
                                                     style: TextStyle(
-                                                      fontSize: 10,
+                                                      fontSize: 10.sp,
                                                       fontWeight:
                                                           FontWeight.w500,
                                                       color:
@@ -914,13 +879,13 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                                   .shade700,
                                                     ),
                                                   ),
-                                                  SizedBox(height: 4),
+                                                  SizedBox(height: 4.h),
                                                   Text(
                                                     turfDetails['dates'][i]
                                                             ['date'] ??
                                                         '',
                                                     style: TextStyle(
-                                                      fontSize: 18,
+                                                      fontSize: 18.sp,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color:
@@ -939,22 +904,22 @@ class _TurfDetailsState extends State<TurfDetails> {
                                 ),
                               ),
 
-                              // SizedBox(height: 20),
+                              SizedBox(height: 20.h),
 
                               // Time Slots - Enhanced
                               if (isLoading || isLoadingSlot)
                                 for (var j = 0; j < 3; j++)
                                   Container(
-                                    margin: EdgeInsets.only(bottom: 12),
+                                    margin: EdgeInsets.only(bottom: 12.h),
                                     child: Shimmer.fromColors(
                                       baseColor: Colors.grey.shade200,
                                       highlightColor: Colors.grey.shade100,
                                       child: Container(
-                                        height: 65,
+                                        height: 65.h,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(12.w),
                                         ),
                                       ),
                                     ),
@@ -982,16 +947,17 @@ class _TurfDetailsState extends State<TurfDetails> {
                                       }
                                     },
                                     child: Container(
-                                      height: 70,
-                                      margin: EdgeInsets.only(bottom: 12),
+                                      height: 70.h,
+                                      margin: EdgeInsets.only(bottom: 12.h),
                                       padding: EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 12),
+                                          horizontal: 16.w, vertical: 12.h),
                                       decoration: BoxDecoration(
                                         color:
                                             slotList[j]['is_in_my_cart'] == true
                                                 ? Colors.green.shade50
                                                 : Colors.white,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius:
+                                            BorderRadius.circular(12.w),
                                         border: Border.all(
                                           color: slotList[j]['is_booked'] ==
                                                   true
@@ -1000,13 +966,13 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                       true
                                                   ? Colors.green.shade400
                                                   : Colors.grey.shade300),
-                                          width: 1.5,
+                                          width: 1.5.w,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.grey.shade100,
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
+                                            blurRadius: 8.w,
+                                            offset: Offset(0, 4.h),
                                           ),
                                         ],
                                       ),
@@ -1023,7 +989,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                               Text(
                                                 slotList[j]['label'] ?? '',
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 16.sp,
                                                   fontWeight: FontWeight.w600,
                                                   color: slotList[j][
                                                               'is_in_my_cart'] ==
@@ -1034,13 +1000,13 @@ class _TurfDetailsState extends State<TurfDetails> {
                                               ),
                                               if (slotList[j]['description'] !=
                                                   null)
-                                                SizedBox(height: 4),
+                                                SizedBox(height: 4.h),
                                               if (slotList[j]['description'] !=
                                                   null)
                                                 Text(
                                                   slotList[j]['description'],
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 12.sp,
                                                     color: Colors.grey.shade500,
                                                   ),
                                                 ),
@@ -1048,7 +1014,8 @@ class _TurfDetailsState extends State<TurfDetails> {
                                           ),
                                           Container(
                                             padding: EdgeInsets.symmetric(
-                                                horizontal: 16, vertical: 8),
+                                                horizontal: 16.w,
+                                                vertical: 8.h),
                                             decoration: BoxDecoration(
                                               color: slotList[j]
                                                           ['is_in_my_cart'] ==
@@ -1056,7 +1023,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                   ? Colors.green.shade500
                                                   : Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(8.w),
                                               border: Border.all(
                                                 color: slotList[j]
                                                             ['is_in_my_cart'] ==
@@ -1068,7 +1035,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                         ? Colors.red.shade300
                                                         : Colors
                                                             .green.shade500),
-                                                width: 1.5,
+                                                width: 1.5.w,
                                               ),
                                             ),
                                             child: Text(
@@ -1079,6 +1046,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                                           .toString(),
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
+                                                fontSize: 14.sp,
                                                 color: slotList[j]
                                                             ['is_in_my_cart'] ==
                                                         true
@@ -1097,7 +1065,7 @@ class _TurfDetailsState extends State<TurfDetails> {
                                     ),
                                   ),
 
-                              SizedBox(height: 30),
+                              SizedBox(height: 30.h),
                             ],
                           ),
                         ],

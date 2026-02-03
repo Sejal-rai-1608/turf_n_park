@@ -1,16 +1,16 @@
 import 'dart:convert';
-
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../helpers/helper_functions.dart';
 
 class BookingDetails extends StatefulWidget {
   BookingDetails(this.bookingDetails);
   var bookingDetails;
+
   @override
   State<BookingDetails> createState() =>
       _BookingDetailsState(this.bookingDetails);
@@ -21,17 +21,9 @@ class _BookingDetailsState extends State<BookingDetails> {
   var bookingDetails;
   bool isCancel = false;
   String invoiceString = '';
-  int selectedDayIndex = 0;
   bool isLoading = false;
   Map bookingData = {};
-  // var slotList = [];
-  List slotList = [
-    // {"id":"1","name":"1 Months"},
-    // {"id":"2","name":"2 Months"},
-    // {"id":"3","name":"3 Months"},
-    // {"id":"4","name":"4 Months"},
-  ];
-  var dropdownSelectedSlot = "";
+  List slotList = [];
 
   @override
   void initState() {
@@ -48,431 +40,671 @@ class _BookingDetailsState extends State<BookingDetails> {
   }
 
   getBookingDetails(context) async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted)
+      setState(() {
+        isLoading = true;
+      });
+
     var url = Uri.parse(Constants.base_url + 'Service/booking_details');
     var response = await http.post(url, body: {
       "userToken": Constants.token,
       "booking_id": bookingDetails['id']
     });
-    var body = jsonDecode(response.body);
-    print(body);
-    if (response.statusCode == 200) {
-      isCancel = body['can_cancel'] == "true" ? true : false;
-      var list = body['message'];
-      invoiceString = body['encoded_string'].toString();
 
+    if (mounted) {
+      if (response.statusCode == 200) {
+        var body = jsonDecode(response.body);
+        isCancel = body['can_cancel'] == "true";
+        invoiceString = body['encoded_string'].toString();
+        setState(() {
+          bookingData = body['message'];
+        });
+      } else {
+        var body = jsonDecode(response.body);
+        showSnackbar(context, body['message'].toString());
+        setState(() {
+          bookingData = {};
+        });
+      }
       setState(() {
-        bookingData = list;
+        isLoading = false;
       });
-    } else {
-      showSnackbar(context, body['message'].toString());
-      bookingData = {};
-      setState(() {});
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
   requestCancellation(context) async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted)
+      setState(() {
+        isLoading = true;
+      });
+
     var url = Uri.parse(Constants.base_url + 'Service/request_cancellation');
     var response = await http.post(url, body: {
       "userToken": Constants.token,
       "booking_id": bookingDetails['id']
     });
-    var body = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      showSnackbar(context, body['message']);
-      //  var list = body['message'];
-      Navigator.of(context).pop(true);
-    } else {
-      showSnackbar(context, body['message']);
-      bookingData = {};
-      setState(() {});
+    if (mounted) {
+      var body = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        showSnackbar(context, body['message']);
+        Navigator.of(context).pop(true);
+      } else {
+        showSnackbar(context, body['message']);
+      }
+      setState(() {
+        isLoading = false;
+      });
     }
-    setState(() {
-      isLoading = false;
-    });
+  }
+
+  void _showCancellationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.w),
+        ),
+        title: Text(
+          "Cancel Booking?",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.red.shade700,
+            fontSize: 18.sp,
+          ),
+        ),
+        content: Text(
+          "Are you sure you want to request cancellation for this booking?",
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            fontSize: 14.sp,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "No",
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
+              ),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              requestCancellation(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.w),
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: 20.w,
+                vertical: 10.h,
+              ),
+            ),
+            child: Text(
+              "Yes, Cancel",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: MediaQuery.of(context).size.height,
-          child: Stack(children: [
-            if (bookingDetails['image'] != null)
-              Container(
-                // margin:EdgeInsets.symmetric(horizontal:10,vertical:10 ),
-                // padding: EdgeInsets.symmetric(horizontal:10,vertical:10 ),
-                height: 200, width: double.infinity,
-                child: FancyShimmerImage(
-                  imageUrl: bookingDetails['image'],
-                  boxFit: BoxFit.cover,
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.green.shade600,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(25.w),
+            ),
+          ),
+          leading: Container(
+            margin: EdgeInsets.only(left: 10.w),
+            child: CircleAvatar(
+              backgroundColor: Colors.white.withOpacity(0.2),
+              radius: 20.w,
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 18.w,
+                  color: Colors.white,
                 ),
-                // width: MediaQuery.of(context).size.width*0.85,
-                // decoration: BoxDecoration(
-                //   image: DecorationImage(
-                //     image: NetworkImage(bookingDetails['image']),
-                //     fit: BoxFit.cover,
-                //   )
-                // )
+                onPressed: () => Navigator.pop(context),
               ),
-            Positioned(
-                top: 10,
-                left: 10,
+            ),
+          ),
+          title: Text(
+            "Booking Details",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 18.sp,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: Container(
+          color: Colors.white,
+          child: Column(
+            children: [
+              // Header Image
+              if (bookingDetails['image'] != null)
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    width: double.infinity,
+                    child: FancyShimmerImage(
+                      imageUrl: bookingDetails['image'] ?? '',
+                      errorWidget: Container(
+                        color: Colors.grey.shade200,
+                        child: Icon(
+                          Icons.image_outlined,
+                          size: 60.w,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                      boxFit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+
+              // Content Section
+              Expanded(
+                flex: 7,
                 child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                        color: Colors.white, shape: BoxShape.circle),
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_rounded, size: 22),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ))),
-            Positioned(
-              top: 180,
-              height: MediaQuery.of(context).size.height - 180,
-              child: Container(
-                  padding: EdgeInsets.all(20),
-                  // alignment: Alignment.bottomCenter,
-                  height: MediaQuery.of(context).size.width - 180,
-                  width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20)),
-                      color: Colors.white),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.w),
+                      topRight: Radius.circular(30.w),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20.w,
+                        offset: Offset(0, -5.h),
+                      ),
+                    ],
+                  ),
                   child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.all(16.w),
                     child: Column(
-                        // mainAxisAlignment:MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 10,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Booking Info Card
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.w),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade100,
+                                blurRadius: 10.w,
+                                offset: Offset(0, 4.h),
+                              ),
+                            ],
                           ),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              // crossAxisAlignment: ,
-                              children: [
-                                Text("#" + bookingDetails['booking_no'],
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey.shade600)),
-                              ]),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              // crossAxisAlignment: ,
-                              children: [
-                                if (bookingDetails['title'] != null)
-                                  Text(bookingDetails['title'],
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black)),
-                              ]),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              // crossAxisAlignment: ,
-                              children: [
-                                Text(
-                                    "Amount Paid : " + bookingDetails['amount'],
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey.shade700)),
-                              ]),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Divider(),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Row(children: [
-                            isLoading
-                                ? Container(
-                                    child: Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade400,
-                                      highlightColor: Colors.grey.shade600,
-                                      enabled: true,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8)),
-                                          color: Colors.white,
-                                        ),
-                                        // width: MediaQuery.of(context).size.width*0.90,
-                                        height: 50,
-                                        width: 50,
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        // border: Border.all(color:Colors.grey.shade700,width: 1.0),
-                                        color: Colors.grey,
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/user-image.png"),
-                                          fit: BoxFit.cover,
-                                        )),
-                                    alignment: Alignment.center,
-                                    width: 50,
-                                    height: 50,
-                                  ),
-                            isLoading
-                                ? Container(
-                                    padding: EdgeInsets.all(5),
-                                    child: Shimmer.fromColors(
-                                      baseColor: Colors.grey.shade200,
-                                      highlightColor: Colors.grey.shade400,
-                                      enabled: true,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(2)),
-                                          color: Colors.white,
-                                        ),
-                                        // width: MediaQuery.of(context).size.width*0.90,
-                                        height: 20,
-                                        width: 200,
-                                      ),
-                                    ),
-                                  )
-                                : Column(
-                                    children: [
-                                      if (bookingDetails["owner_details"] !=
-                                          null)
-                                        Container(
-                                            padding: EdgeInsets.only(left: 20),
-                                            alignment: Alignment.centerLeft,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                100,
-                                            height: 30,
-                                            child: Text(
-                                                "" +
-                                                    bookingData["owner_details"]
-                                                            ['name']
-                                                        .toString(),
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    color:
-                                                        Colors.red.shade400))),
-                                      if (bookingDetails["owner_details"] !=
-                                          null)
-                                        Container(
-                                            padding: EdgeInsets.only(left: 20),
-                                            alignment: Alignment.centerLeft,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                100,
-                                            height: 20,
-                                            child: Text(
-                                                "" +
-                                                    bookingData["owner_details"]
-                                                            ['mobile']
-                                                        .toString(),
-                                                style: TextStyle(
-                                                    color: Colors.grey.shade700,
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.bold)))
-                                    ],
-                                  )
-                          ]),
-                          if (isLoading)
-                            for (var j = 0; j < slotList.length; j++)
-                              Container(
-                                padding: EdgeInsets.all(5),
-                                child: Shimmer.fromColors(
-                                  baseColor: Colors.grey.shade200,
-                                  highlightColor: Colors.grey.shade400,
-                                  enabled: true,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                      color: Colors.white,
-                                    ),
-                                    // width: MediaQuery.of(context).size.width*0.90,
-                                    height: 50,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
-                                  ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "BOOKING #${bookingDetails['booking_no'] ?? ''}",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1,
                                 ),
                               ),
-                          SizedBox(
-                            height: 10,
+                              SizedBox(height: 8.h),
+                              Text(
+                                bookingDetails['title'] ?? 'Booking',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade900,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 12.h),
+                              Divider(
+                                  color: Colors.grey.shade200, thickness: 1.w),
+                              SizedBox(height: 12.h),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Amount Paid",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  Text(
+                                    "₹${bookingDetails['amount'] ?? '0'}",
+                                    style: TextStyle(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          if (!isLoading && isCancel == true)
-                            GestureDetector(
-                              onTap: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Cancel Booking"),
-                                        content: Text(
-                                            "Are you sure you want to cancel this booking?"),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text("No")),
-                                          TextButton(
-                                              style: ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStateProperty.all<
-                                                            Color>(
-                                                        Colors.red.shade400),
-                                              ),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                requestCancellation(context);
-                                              },
-                                              child: Text(
-                                                "Yes",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              )),
-                                        ],
-                                      );
-                                    });
-                              },
-                              child: Container(
-                                  alignment: Alignment.center,
-                                  margin: EdgeInsets.only(bottom: 25, top: 10),
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.88,
-                                  child: Container(
-                                      alignment: Alignment.center,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.85,
-                                      padding: EdgeInsets.all(15),
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.red.shade400),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(8))),
-                                      child: Text(
-                                        "Request Cancellation",
-                                        style: TextStyle(
-                                            color: Colors.red.shade400,
-                                            fontWeight: FontWeight.bold),
-                                      ))),
+                        ),
+
+                        SizedBox(height: 20.h),
+
+                        // Owner Details Card
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.w),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5.w,
                             ),
-                          if (bookingData["details"] != null)
-                            if (!isLoading && bookingData['details'].length > 0)
-                              for (var j = 0;
-                                  j < bookingData['details'].length;
-                                  j++)
-                                GestureDetector(
-                                  // onTap: (){
-                                  //   if(bookingData['details'][j]['is_booked']){
-                                  //     showSnackbar(context,"This Slot is Already Booked.");
-                                  //   }else  if(bookingData['details'][j]['is_in_my_cart']){
-                                  //     showSnackbar(context,"This Slot is Already in your cart.");
-                                  //   }else {
-                                  //     addToCart(context,turfDetails["dates"][selectedDayIndex]['full_date'],bookingData['details'][j]['start'],bookingData['details'][j]['end'],bookingData['details'][j]['rent'],j);
-                                  //   }
-                                  // },
-                                  child: Container(
-                                      height: 50,
-                                      margin: EdgeInsets.all(4),
-                                      padding: EdgeInsets.all(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade100,
+                                blurRadius: 10.w,
+                                offset: Offset(0, 4.h),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "CONTACT DETAILS",
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              if (bookingData["owner_details"] != null &&
+                                  !isLoading)
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 50.w,
+                                      height: 50.w,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(8)),
-                                        border: Border.all(
-                                            color: Colors.red.shade400,
-                                            width: 1.0),
-                                        color: Colors.grey.shade100,
+                                        shape: BoxShape.circle,
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.green.shade100,
+                                            Colors.blue.shade100,
+                                          ],
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            blurRadius: 8.w,
+                                            offset: Offset(0, 4.h),
+                                          ),
+                                        ],
                                       ),
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.person_outline_rounded,
+                                          size: 28.w,
+                                          color: Colors.green.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 15.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            bookingData["owner_details"]
+                                                    ['name'] ??
+                                                '',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green.shade900,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            bookingData["owner_details"]
+                                                    ['mobile'] ??
+                                                '',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else if (isLoading)
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 50.w,
+                                      height: 50.w,
+                                      child: Shimmer.fromColors(
+                                        baseColor: Colors.grey.shade300,
+                                        highlightColor: Colors.grey.shade100,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 15.w),
+                                    Expanded(
+                                      child: Shimmer.fromColors(
+                                        baseColor: Colors.grey.shade200,
+                                        highlightColor: Colors.grey.shade100,
+                                        child: Container(
+                                          height: 20.h,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(4.w),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        //  SizedBox(height: 20.h),
+
+                        // Booking Slots Section
+                        if (bookingData["details"] != null &&
+                            bookingData['details'].length > 0)
+                          Container(
+                            margin: EdgeInsets.only(top: 20.h),
+                            padding: EdgeInsets.all(16.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16.w),
+                              border: Border.all(
+                                color: Colors.grey.shade200,
+                                width: 1.5.w,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.shade100,
+                                  blurRadius: 10.w,
+                                  offset: Offset(0, 4.h),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(10.w),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius:
+                                            BorderRadius.circular(12.w),
+                                      ),
+                                      child: Icon(
+                                        Icons.calendar_today_rounded,
+                                        color: Colors.green.shade700,
+                                        size: 16.w,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      child: Text(
+                                        "Booking Schedule",
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16.h),
+                                if (isLoading)
+                                  for (var i = 0; i < 3; i++)
+                                    Container(
+                                      margin: EdgeInsets.only(bottom: 10.h),
+                                      child: Shimmer.fromColors(
+                                        baseColor: Colors.grey.shade200,
+                                        highlightColor: Colors.grey.shade100,
+                                        child: Container(
+                                          height: 60.h,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(12.w),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                if (!isLoading)
+                                  ...bookingData['details'].map((slot) {
+                                    return Container(
+                                      margin: EdgeInsets.only(bottom: 10.h),
+                                      padding: EdgeInsets.all(12.w),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade50,
+                                        borderRadius:
+                                            BorderRadius.circular(12.w),
+                                        border: Border.all(
+                                          color: Colors.green.shade200,
+                                          width: 1.5.w,
+                                        ),
+                                      ),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            bookingData['details'][j]
-                                                ['date_show'],
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                slot['date_show'] ?? '',
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.green.shade900,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                "Booking Date",
+                                                style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            bookingData['details'][j]['label'],
-                                            style:
-                                                TextStyle(color: Colors.black),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                slot['label'] ?? '',
+                                                style: TextStyle(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.green.shade900,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                "Time Slot",
+                                                style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          // Container(
-                                          //   padding:EdgeInsets.all(6),
-                                          //   decoration: BoxDecoration(
-                                          //     borderRadius: BorderRadius.all(Radius.circular(8)),
-                                          //     border: Border.all(color:Colors.white,width: 1.0) ,
-                                          //     // color: Colors.grey.shade100,
-                                          //   ),
-                                          //   child:bookingData['details'][j]['is_booked'] == true ? Text("Booked.",style: TextStyle(color:Colors.red.shade400),) : Text("Rs."+bookingData['details'][j]['rent'].toString(),style: TextStyle(color:bookingData['details'][j]['is_in_my_cart'] == true ? Colors.white:Colors.red.shade400),)
-                                          // ),
                                         ],
-                                      )),
-                                ),
-                          if (bookingData["details"] != null)
-                            ElevatedButton(
-                              onPressed: () {
-                                _launchUrl();
-                              },
-                              child: Text("View Invoice"),
+                                      ),
+                                    );
+                                  }).toList(),
+                              ],
                             ),
-                          SizedBox(
-                            height: 20,
                           ),
-                        ]),
-                  )),
-            ),
-            //   Positioned(
-            //     top:180,
-            //     child:Container(
-            //       padding: EdgeInsets.all(15),
-            //       width:MediaQuery.of(context).size.width,
-            //       height: 30,
-            //         decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.only(topLeft:Radius.circular(20),topRight:Radius.circular(20)),
-            //             color: Colors.white
-            //           ),
-            //     )
-            //   ),
-          ]),
+
+                        SizedBox(height: 20.h),
+
+                        // Actions Section
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.w),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade100,
+                                blurRadius: 10.w,
+                                offset: Offset(0, 4.h),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // Invoice Button
+                              ElevatedButton(
+                                onPressed: _launchUrl,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.shade600,
+                                  minimumSize: Size(double.infinity, 55.h),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.w),
+                                  ),
+                                  elevation: 3,
+                                  shadowColor: Colors.blue.shade200,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.receipt_long_rounded,
+                                      size: 20.w,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    Text(
+                                      "VIEW INVOICE",
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              SizedBox(height: 15.h),
+
+                              // Cancellation Button
+                              if (!isLoading && isCancel == true)
+                                OutlinedButton(
+                                  onPressed: () =>
+                                      _showCancellationDialog(context),
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: Colors.red.shade400,
+                                      width: 2.w,
+                                    ),
+                                    minimumSize: Size(double.infinity, 55.h),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.w),
+                                    ),
+                                    backgroundColor: Colors.red.shade50,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.cancel_outlined,
+                                        size: 20.w,
+                                        color: Colors.red.shade600,
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        "REQUEST CANCELLATION",
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-// Widget create
-
-  calculateAndPay() {}
 }
