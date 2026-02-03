@@ -32,18 +32,24 @@ class _BookingDetailsState extends State<BookingDetails> {
   }
 
   Future<void> _launchUrl() async {
-    final Uri _url = Uri.parse(
-        'https://turfnpark.com/turf-admin/Invoice/viewinvoice?invoice=$invoiceString');
-    if (!await launchUrl(_url)) {
-      throw 'Could not launch $_url';
+    if (invoiceString.isEmpty) {
+      showSnackbar(context, "Invoice not available!");
+      return;
+    }
+
+    final Uri url = Uri.parse(invoiceString);
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      showSnackbar(context, "Could not open invoice");
     }
   }
 
   getBookingDetails(context) async {
-    if (mounted)
+    if (mounted) {
       setState(() {
         isLoading = true;
       });
+    }
 
     var url = Uri.parse(Constants.base_url + 'Service/booking_details');
     var response = await http.post(url, body: {
@@ -54,18 +60,37 @@ class _BookingDetailsState extends State<BookingDetails> {
     if (mounted) {
       if (response.statusCode == 200) {
         var body = jsonDecode(response.body);
+        setState(() {
+          bookingData = body['message'];
+        });
+// ✅ Take invoice url directly
+        invoiceString = bookingData['url']?.toString() ?? "";
+        print("Invoice URL: $invoiceString");
+
+        // ✅ DEBUG HERE
+        print("Booking Details API Response: $body");
+        print("Encoded Invoice String: ${body['encoded_string']}");
+
         isCancel = body['can_cancel'] == "true";
-        invoiceString = body['encoded_string'].toString();
+
+        invoiceString = body['message']['url']?.toString() ?? "";
+        print("Invoice URL: $invoiceString");
+
         setState(() {
           bookingData = body['message'];
         });
       } else {
         var body = jsonDecode(response.body);
+
+        // ✅ DEBUG HERE ALSO
+        print("Booking Details API Error: $body");
+
         showSnackbar(context, body['message'].toString());
         setState(() {
           bookingData = {};
         });
       }
+
       setState(() {
         isLoading = false;
       });
@@ -622,34 +647,25 @@ class _BookingDetailsState extends State<BookingDetails> {
                             children: [
                               // Invoice Button
                               ElevatedButton(
-                                onPressed: _launchUrl,
+                                onPressed: (isLoading || invoiceString.isEmpty)
+                                    ? null
+                                    : _launchUrl,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
                                   minimumSize: Size(double.infinity, 55.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.w),
                                   ),
-                                  elevation: 3,
-                                  shadowColor: Colors.blue.shade200,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.receipt_long_rounded,
-                                      size: 20.w,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 10.w),
-                                    Text(
-                                      "VIEW INVOICE",
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  invoiceString.isEmpty
+                                      ? "LOADING INVOICE..."
+                                      : "VIEW INVOICE",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
 
